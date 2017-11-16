@@ -35,38 +35,91 @@
 
 @interface MXLCalendarEvent ()
 
--(NSString *)dayOfWeekFromInteger:(NSInteger)day;
+@property (nonatomic, retain) NSDateFormatter *dateFormatter;
+
+@property (nonatomic, copy) NSString *exRuleFrequency;
+@property (nonatomic, copy) NSString *exRuleCount;
+@property (nonatomic, copy) NSString *exRuleRuleWkSt;
+@property (nonatomic, copy) NSString *exRuleInterval;
+@property (nonatomic, copy) NSString *exRuleWeekStart;
+@property (nonatomic, copy) NSDate   *exRuleUntilDate;
+
+@property (nonatomic, retain) NSArray *exRuleBySecond;
+@property (nonatomic, retain) NSArray *exRuleByMinute;
+@property (nonatomic, retain) NSArray *exRuleByHour;
+@property (nonatomic, retain) NSArray *exRuleByDay;
+@property (nonatomic, retain) NSArray *exRuleByMonthDay;
+@property (nonatomic, retain) NSArray *exRuleByYearDay;
+@property (nonatomic, retain) NSArray *exRuleByWeekNo;
+@property (nonatomic, retain) NSArray *exRuleByMonth;
+@property (nonatomic, retain) NSArray *exRuleBySetPos;
+
+@property (nonatomic, copy) NSString *repeatRuleFrequency;
+@property (nonatomic, copy) NSString *repeatRuleCount;
+@property (nonatomic, copy) NSString *repeatRuleRuleWkSt;
+@property (nonatomic, copy) NSString *repeatRuleInterval;
+@property (nonatomic, copy) NSString *repeatRuleWeekStart;
+@property (nonatomic, copy) NSDate   *repeatRuleUntilDate;
+
+@property (nonatomic, retain) NSArray *repeatRuleBySecond;
+@property (nonatomic, retain) NSArray *repeatRuleByMinute;
+@property (nonatomic, retain) NSArray *repeatRuleByHour;
+@property (nonatomic, retain) NSArray *repeatRuleByDay;
+@property (nonatomic, retain) NSArray *repeatRuleByMonthDay;
+@property (nonatomic, retain) NSArray *repeatRuleByYearDay;
+@property (nonatomic, retain) NSArray *repeatRuleByWeekNo;
+@property (nonatomic, retain) NSArray *repeatRuleByMonth;
+@property (nonatomic, retain) NSArray *repeatRuleBySetPos;
+
+@property (nonatomic, retain) NSArray *eventExceptionDates;
+
+@property (nonatomic, retain) NSCalendar *calendar;
+
+//-(NSString *)dayOfWeekFromInteger:(NSInteger)day;
 
 @end
 
 @implementation MXLCalendarEvent
 
--(id)initWithStartDate:(NSString *)startString
-               endDate:(NSString *)endString
-             createdAt:(NSString *)createdString
-          lastModified:(NSString *)lastModifiedString
-              uniqueID:(NSString *)uniqueID
-          recurrenceID:(NSString *)recurrenceID
-               summary:(NSString *)summary
-           description:(NSString *)description
-              location:(NSString *)location
-                status:(NSString *)status
-       recurrenceRules:(NSString *)recurRules
-        exceptionDates:(NSArray *)exceptionDates
-         exceptionRule:(NSString *)exceptionRule
-    timeZoneIdentifier:(NSString *)timezoneID
-             attendees:(NSArray<MXLCalendarAttendee *> *)attendees {
+- (id)copyWithZone:(NSZone *)zone {
+    
+    MXLCalendarEvent *copy = [[MXLCalendarEvent allocWithZone:zone] init];
+    
+    if (copy) {
+        
+        
+    }
+    
+    return copy;
+}
+
+- (id)initWithStartDate:(NSString *)startString
+                endDate:(NSString *)endString
+              createdAt:(NSString *)createdString
+           lastModified:(NSString *)lastModifiedString
+               uniqueID:(NSString *)uniqueID
+           recurrenceID:(NSString *)recurrenceID
+                summary:(NSString *)summary
+            description:(NSString *)description
+               location:(NSString *)location
+                 status:(NSString *)status
+        recurrenceRules:(NSString *)recurRules
+         exceptionDates:(NSArray *)exceptionDates
+          exceptionRule:(NSString *)exceptionRule
+     timeZoneIdentifier:(NSString *)timezoneID
+              attendees:(NSArray<MXLCalendarAttendee *> *)attendees {
 
     self = [super init];
 
     if (self) {
-        calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+        
+        self.calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
 
         // Set up the shared NSDateFormatter instance to convert the strings to NSDate objects
-        dateFormatter = [[NSDateFormatter alloc] init];
-        [dateFormatter setTimeZone:([NSTimeZone timeZoneWithName:timezoneID] ?: [NSTimeZone localTimeZone])];
+        self.dateFormatter = [[NSDateFormatter alloc] init];
+        [self.dateFormatter setTimeZone:([NSTimeZone timeZoneWithName:timezoneID] ?: [NSTimeZone localTimeZone])];
 
-        [dateFormatter setDateFormat:@"yyyyMMdd HHmmss"];
+        [self.dateFormatter setDateFormat:@"dd-MM-yyyy HH:mm:ss"];
 
         // Set the date objects to the converted NSString objects
         self.eventStartDate = [self dateFromString:startString];
@@ -93,7 +146,8 @@
     return self;
 }
 
--(NSDate *)dateFromString:(NSString *)dateString {
+- (NSDate *)dateFromString:(NSString *)dateString {
+    
     NSDate *date = nil;
     
     dateString = [dateString stringByReplacingOccurrencesOfString:@"T" withString:@" "];
@@ -101,33 +155,33 @@
     BOOL containsZone = [dateString rangeOfString:@"z" options:NSCaseInsensitiveSearch].location != NSNotFound;
     
     if (containsZone) {
-        dateFormatter.dateFormat = @"yyyyMMdd HHmmssz";
+        self.dateFormatter.dateFormat = @"dd-MM-yyyy HH:mm:ss z";
     }
     
-    date = [dateFormatter dateFromString:dateString];
+    date = [self.dateFormatter dateFromString:dateString];
     
     if (!date) {
         if (containsZone) {
-            dateFormatter.dateFormat = @"yyyyMMddz";
-        }
-        else {
-            dateFormatter.dateFormat = @"yyyyMMdd";
+            
+            self.dateFormatter.dateFormat = @"dd-MM-yyyy z";
+        } else {
+            
+            self.dateFormatter.dateFormat = @"dd-MM-yyyy";
         }
         
-        date = [dateFormatter dateFromString:dateString];
+        date = [self.dateFormatter dateFromString:dateString];
             
         if (date) {
             self.eventIsAllDay = YES;
         }
     }
     
-    dateFormatter.dateFormat = @"yyyyMMdd HHmmss";
+    self.dateFormatter.dateFormat = @"dd-MM-yyyy HH:mm:ss";
     
     return date;
 }
 
--(void)parseRules:(NSString *)rule
-          forType:(MXLCalendarEventRuleType)type {
+- (void)parseRules:(NSString *)rule forType:(MXLCalendarEventRuleType)type {
 
     if (!rule)
         return;
@@ -699,63 +753,65 @@
     return NO;
 }
 
-- (EKEvent *)convertToEKEventOnDate:(NSDate *)date store:(EKEventStore *)eventStore {
-    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear
-                                                                   fromDate:self.eventStartDate];
+- (EKEvent *)convertToEKEventOnDate:(NSDate *)date withEventStore:(EKEventStore *)eventStore {
+    
+    NSCalendarUnit fullUnit = (NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear);
+    
+    NSDateComponents *startComponents = [[NSCalendar currentCalendar] components:fullUnit
+                                                                        fromDate:self.eventStartDate];
 
-    NSDateComponents *endComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear
+    NSDateComponents *endComponents = [[NSCalendar currentCalendar] components:fullUnit
                                                                       fromDate:self.eventEndDate];
 
     NSDateComponents *selectedDayComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear
                                                                               fromDate:date];
 
-    [components setDay:[selectedDayComponents day]];
-    [components setMonth:[selectedDayComponents month]];
-    [components setYear:[selectedDayComponents year]];
+    [startComponents setDay:[selectedDayComponents day]];
+    [startComponents setMonth:[selectedDayComponents month]];
+    [cstartComponentsomponents setYear:[selectedDayComponents year]];
 
     [endComponents setDay:[selectedDayComponents day]];
     [endComponents setMonth:[selectedDayComponents month]];
     [endComponents setYear:[selectedDayComponents year]];
 
     EKEvent *event = [EKEvent eventWithEventStore:eventStore];
-    [event setTitle:[self eventSummary]];
-    [event setNotes:[self eventDescription]];
-    [event setLocation:[self eventLocation]];
-    [event setAllDay:[self eventIsAllDay]];
+    [event setTitle:self.eventSummary];
+    [event setNotes:self.eventDescription];
+    [event setLocation:self.eventLocation];
+    [event setAllDay:self.eventIsAllDay];
 
-    [event setStartDate:[[NSCalendar currentCalendar] dateFromComponents:components]];
+    [event setStartDate:[[NSCalendar currentCalendar] dateFromComponents:startComponents]];
     [event setEndDate:[[NSCalendar currentCalendar] dateFromComponents:endComponents]];
 
     return event;
 }
 
-
--(NSString *)dayOfWeekFromInteger:(NSInteger)day {
-    switch (day) {
-        case 1:
-            return @"SU";
-            break;
-        case 2:
-            return @"MO";
-            break;
-        case 3:
-            return @"TU";
-            break;
-        case 4:
-            return @"WE";
-            break;
-        case 5:
-            return @"TH";
-            break;
-        case 6:
-            return @"FR";
-            break;
-        case 7:
-            return @"SA";
-            break;
-        default:
-            return @"";
-            break;
-    }
+- (EKEvent *)convertToEKEventWithEventStore:(EKEventStore *)eventStore {
+    
+    EKEvent *event = [EKEvent eventWithEventStore:eventStore];
+    [event setTitle:self.eventSummary];
+    [event setNotes:self.eventDescription];
+    [event setLocation:self.eventLocation];
+    [event setAllDay:self.eventIsAllDay];
+    
+    [event setStartDate:self.eventStartDate];
+    [event setEndDate:self.eventEndDate];
+    
+    return event;
 }
+
+- (NSString *)gregorianCalendarLocalizedDayOfWeekStringFromInteger:(NSInteger)day {
+    
+    NSDateComponents *weekDayComponents = [NSCalendar.currentCalendar component:NSCalendarUnitWeekday fromDate:NSDate.date];
+    
+    weekDayComponents.weekday = day;
+    
+    NSDate *localizedDate = [NSCalendar.currentCalendar dateFromComponents:weekDayComponents];
+    
+    NSDateFormatter *localizedWeekDayFormatter = [NSDateFormatter new];
+    localizedWeekDayFormatter.dateFormat = @"EE";
+    
+    return [localizedWeekDayFormatter stringFromDate:localizedDate];
+}
+
 @end

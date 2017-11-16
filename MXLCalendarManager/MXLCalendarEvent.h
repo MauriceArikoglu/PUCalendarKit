@@ -34,47 +34,7 @@ typedef enum {
     MXLCalendarEventRuleTypeException
 }MXLCalendarEventRuleType;
 
-@interface MXLCalendarEvent : NSObject <NSCopying> {
-    NSDateFormatter *dateFormatter;
-    
-    NSString *exRuleFrequency;
-    NSString *exRuleCount;
-    NSString *exRuleRuleWkSt;
-    NSString *exRuleInterval;
-    NSString *exRuleWeekStart;
-    NSDate   *exRuleUntilDate;
-    
-    NSArray *exRuleBySecond;
-    NSArray *exRuleByMinute;
-    NSArray *exRuleByHour;
-    NSArray *exRuleByDay;
-    NSArray *exRuleByMonthDay;
-    NSArray *exRuleByYearDay;
-    NSArray *exRuleByWeekNo;
-    NSArray *exRuleByMonth;
-    NSArray *exRuleBySetPos;
-    
-    NSString *repeatRuleFrequency;
-    NSString *repeatRuleCount;
-    NSString *repeatRuleRuleWkSt;
-    NSString *repeatRuleInterval;
-    NSString *repeatRuleWeekStart;
-    NSDate   *repeatRuleUntilDate;
-    
-    NSArray *repeatRuleBySecond;
-    NSArray *repeatRuleByMinute;
-    NSArray *repeatRuleByHour;
-    NSArray *repeatRuleByDay;
-    NSArray *repeatRuleByMonthDay;
-    NSArray *repeatRuleByYearDay;
-    NSArray *repeatRuleByWeekNo;
-    NSArray *repeatRuleByMonth;
-    NSArray *repeatRuleBySetPos;
-    
-    NSArray *eventExceptionDates;
-    
-    NSCalendar *calendar;
-}
+@interface MXLCalendarEvent : NSObject <NSCopying> 
 
 @property (strong, nonatomic) NSDate *eventStartDate;
 @property (strong, nonatomic) NSDate *eventEndDate;
