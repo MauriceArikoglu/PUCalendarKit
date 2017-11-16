@@ -10,22 +10,25 @@
 
 @implementation NSTimeZone (ProperAbbreviation)
 
--(NSString *)properAbbreviation {
+- (NSString *)properAbbreviation {
     
     if ([[self abbreviation] isEqualToString:@"GMT"] || [[self abbreviation] isEqualToString:@"BST"]) {
         return [self abbreviation];
     }
 
+#ifdef DEBUG
+    
     NSArray *timezoneNames = [NSTimeZone knownTimeZoneNames];
-	for (NSString *name in
-		 [timezoneNames sortedArrayUsingSelector:@selector(compare:)])
-	{
+    
+	for (NSString *name in [timezoneNames sortedArrayUsingSelector:@selector(compare:)]) {
 		NSLog(@"%@",name);
 	}
     
     NSDictionary *abbrev = [NSTimeZone abbreviationDictionary];
     NSLog(@"%@", abbrev);
-    
+
+#endif
+
     return [[[NSTimeZone abbreviationDictionary] allKeysForObject:self.name] objectAtIndex:0];
 }
 

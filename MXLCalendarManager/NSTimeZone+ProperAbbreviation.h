@@ -10,6 +10,6 @@
 
 @interface NSTimeZone (ProperAbbreviation)
 
--(NSString *)properAbbreviation;
+- (NSString *)properAbbreviation;
 
 @end

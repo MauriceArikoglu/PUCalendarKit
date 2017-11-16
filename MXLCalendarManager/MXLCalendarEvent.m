@@ -52,10 +52,10 @@
               location:(NSString *)location
                 status:(NSString *)status
        recurrenceRules:(NSString *)recurRules
-        exceptionDates:(NSMutableArray *)exceptionDates
+        exceptionDates:(NSArray *)exceptionDates
          exceptionRule:(NSString *)exceptionRule
     timeZoneIdentifier:(NSString *)timezoneID
-             attendees:(NSArray<MXLCalendarAttendee> *)attendees {
+             attendees:(NSArray<MXLCalendarAttendee *> *)attendees {
 
     self = [super init];
 

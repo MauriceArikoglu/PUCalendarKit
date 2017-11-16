@@ -34,7 +34,7 @@ typedef enum {
     MXLCalendarEventRuleTypeException
 }MXLCalendarEventRuleType;
 
-@interface MXLCalendarEvent : NSObject {
+@interface MXLCalendarEvent : NSObject <NSCopying> {
     NSDateFormatter *dateFormatter;
     
     NSString *exRuleFrequency;
@@ -89,7 +89,7 @@ typedef enum {
 @property (strong, nonatomic) NSString *eventDescription;
 @property (strong, nonatomic) NSString *eventLocation;
 @property (strong, nonatomic) NSString *eventStatus;
-@property (strong, nonatomic) NSArray<MXLCalendarAttendee> *attendees;
+@property (strong, nonatomic) NSArray<MXLCalendarAttendee *> *attendees;
 
 @property (strong, nonatomic) NSString *rruleString;
 
@@ -104,10 +104,10 @@ typedef enum {
               location:(NSString *)location
                 status:(NSString *)status
        recurrenceRules:(NSString *)recurRules
-        exceptionDates:(NSMutableArray *)exceptionDates
+        exceptionDates:(NSArray *)exceptionDates
          exceptionRule:(NSString *)exceptionRule
     timeZoneIdentifier:(NSString *)timezoneID
-             attendees:(NSArray<MXLCalendarAttendee> *)attendees;
+             attendees:(NSArray<MXLCalendarAttendee *> *)attendees;
 
 -(NSDate *)dateFromString:(NSString *)dateString;
 

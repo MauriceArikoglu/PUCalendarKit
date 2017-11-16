@@ -24,6 +24,7 @@
 //  THE SOFTWARE.
 
 #import "MXLCalendarManager.h"
+#import "PUEventParser.h"
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
@@ -31,90 +32,78 @@
 
 @interface MXLCalendarManager ()
 
--(void)parseICSString:(NSString *)icsString withCompletionHandler:(void (^)(MXLCalendar *, NSError *))callback;
+//- (void)parseICSString:(NSString *)icsString withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler;
 
 @end
 
 @implementation MXLCalendarManager
 
--(void)scanICSFileAtRemoteURL:(NSURL *)fileURL withCompletionHandler:(void (^)(MXLCalendar *, NSError *))callback {
+- (void)scanICSFileAtRemoteURL:(NSURL *)fileURL withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler {
+    
     #if TARGET_OS_IPHONE
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    if (NSThread.currentThread.isMainThread) {
+        
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    }
     #endif
 
-    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
         NSError *downloadError;
         NSData *fileData = [[NSData alloc] initWithContentsOfURL:fileURL options:0 error:&downloadError];
 
         if (downloadError) {
+            //Hide device network indicator and return error
             #if TARGET_OS_IPHONE
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+            if ([[UIApplication sharedApplication] isNetworkActivityIndicatorVisible]) {
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+                });
+            }
             #endif
-            callback(nil, downloadError);
-            return;
+            
+            return completionHandler(nil, downloadError);
         }
 
         dispatch_async(dispatch_get_main_queue(), ^{
+            //Hide device network indicator
             #if TARGET_OS_IPHONE
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+            if ([[UIApplication sharedApplication] isNetworkActivityIndicatorVisible]) {
+                
+                [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+            }
             #endif
+            
+            //Parse the ICS File String Representation
             NSString *fileString = [[NSString alloc] initWithData:fileData encoding:NSUTF8StringEncoding];
-            [self parseICSString:fileString withCompletionHandler:callback];
+            [self parseICSString:fileString withCompletionHandler:completionHandler];
         });
     });
-
 }
 
--(void)scanICSFileAtLocalPath:(NSString *)filePath withCompletionHandler:(void (^)(MXLCalendar *, NSError *))callback {
+- (void)scanICSFileAtLocalPath:(NSString *)filePath withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler {
+    
     NSError *fileError;
     NSString *calendarFile = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&fileError];
 
     if (fileError) {
-        callback(nil, fileError);
-        return;
+        
+        return completionHandler(nil, fileError);
     }
 
-    [self parseICSString:calendarFile withCompletionHandler:callback];
-
+    [self parseICSString:calendarFile withCompletionHandler:completionHandler];
 }
 
--(MXLCalendarAttendee *) createAttendee:(NSString *) string {
-    if (string) {
+- (void)parseICSString:(NSString *)icsString withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler {
 
+//    NSError *error = nil;
+//    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\n +" options:NSRegularExpressionCaseInsensitive error:&error];
+//    NSString *icsStringWithoutNewlines = [regex stringByReplacingMatchesInString:icsString options:0 range:NSMakeRange(0, [icsString length]) withTemplate:@""];
 
-        MXLCalendarAttendee *attendee = MXLCalendarAttendee.alloc.init;
-        NSString *holder;
-        NSScanner *eventScanner;
-        eventScanner = [NSScanner scannerWithString:string];
-
-        NSString *uri, *attributes;
-        [eventScanner scanUpToString:@":" intoString:&attributes];
-        [eventScanner scanUpToString:@"\n" intoString:&uri];
-        attendee.uri = [uri substringFromIndex:1];
-
-        eventScanner = [NSScanner scannerWithString:attributes];
-        [eventScanner scanUpToString:@"ROLE=" intoString:nil];
-        [eventScanner scanUpToString:@";" intoString:&holder];
-        NSString *role = [holder stringByReplacingOccurrencesOfString:@"ROLE=" withString:@""];
-        attendee.role = (Role) [NSValue value:&role withObjCType:@encode(Role)];
-
-        eventScanner = [NSScanner scannerWithString:attributes];
-        [eventScanner scanUpToString:@"CN=" intoString:nil];
-        [eventScanner scanUpToString:@";" intoString:&holder];
-        NSString *cn = [holder stringByReplacingOccurrencesOfString:@"CN=" withString:@""];
-        attendee.commonName = cn;
-
-        return attendee;
-    } else {
-        return nil;
-    }
-}
-
--(void)parseICSString:(NSString *)icsString withCompletionHandler:(void (^)(MXLCalendar *, NSError *))callback {
-
-    NSError *error = nil;
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\n +" options:NSRegularExpressionCaseInsensitive error:&error];
-    NSString *icsStringWithoutNewlines = [regex stringByReplacingMatchesInString:icsString options:0 range:NSMakeRange(0, [icsString length]) withTemplate:@""];
+    //Remove whitespaces and newline characters
+    NSString *icsStringWithoutNewlines = [icsString stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
 
     // Pull out each line from the calendar file
     NSMutableArray *eventsArray = [NSMutableArray arrayWithArray:[icsStringWithoutNewlines componentsSeparatedByString:@"BEGIN:VEVENT"]];
@@ -124,230 +113,71 @@
     NSString *calendarString;
 
     // Remove the first item (that's just all the stuff before the first VEVENT)
-    if ([eventsArray count] > 0) {
-        NSScanner *scanner = [NSScanner scannerWithString:[eventsArray objectAtIndex:0]];
+    if (eventsArray.count) {
+        
+        /*
+         BEGIN:VCALENDAR
+         PRODID:-//Google Inc//Google Calendar 70.9054//EN
+         VERSION:2.0
+         CALSCALE:GREGORIAN
+         METHOD:PUBLISH
+         X-WR-CALNAME:Halsted Street
+         X-WR-TIMEZONE:America/Chicago
+         X-WR-CALDESC:
+         BEGIN:VTIMEZONE
+         TZID:America/Chicago
+         X-LIC-LOCATION:America/Chicago
+         BEGIN:DAYLIGHT
+         TZOFFSETFROM:-0600
+         TZOFFSETTO:-0500
+         TZNAME:CDT
+         DTSTART:19700308T020000
+         RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+         END:DAYLIGHT
+         BEGIN:STANDARD
+         TZOFFSETFROM:-0500
+         TZOFFSETTO:-0600
+         TZNAME:CST
+         DTSTART:19701101T020000
+         RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+         END:STANDARD
+         END:VTIMEZONE
+         BEGIN:VEVENT
+         DTSTART;TZID=America/Chicago:20130514T174500
+         DTEND;TZID=America/Chicago:20130514T183000
+         DTSTAMP:20130418T162901Z
+         UID:7tadgfphuapsqglqmjtk3b1754@google.com
+         RECURRENCE-ID;TZID=America/Chicago:20130514T174500
+         CREATED:20100108T015126Z
+         DESCRIPTION:Multilevel (Sub- Sarah)\n
+         LAST-MODIFIED:20130417T170827Z
+         LOCATION:3
+         SEQUENCE:1
+         STATUS:CONFIRMED
+         SUMMARY:Spinning
+         TRANSP:OPAQUE
+         END:VEVENT
+         */
+        NSScanner *scanner = [NSScanner scannerWithString:eventsArray.firstObject];
+        
         [scanner scanUpToString:@"TZID:" intoString:nil];
-
         [scanner scanUpToString:@"\n" intoString:&calendarString];
 
-        calendarString = [[[calendarString stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""] stringByReplacingOccurrencesOfString:@"TZID:" withString:@""];
+//        calendarString = [[[calendarString stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""] stringByReplacingOccurrencesOfString:@"TZID:" withString:@""];
+
+        calendarString = [[calendarString stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet] stringByReplacingOccurrencesOfString:@"TZID:" withString:@""];
 
         [eventsArray removeObjectAtIndex:0];
     }
 
-    NSScanner *eventScanner;
-
-
-    // For each event, extract the data
-    for (NSString *event in eventsArray) {
-        NSString *timezoneIDString;
-        NSString *startDateTimeString;
-        NSString *endDateTimeString;
-        NSString *eventUniqueIDString;
-        NSString *recurrenceIDString;
-        NSString *createdDateTimeString;
-        NSString *descriptionString;
-        NSString *lastModifiedDateTimeString;
-        NSString *locationString;
-        NSString *sequenceString;
-        NSString *statusString;
-        NSString *summaryString;
-        NSString *transString;
-        NSString *timeStampString;
-        NSString *repetitionString;
-        NSString *exceptionRuleString;
-        NSMutableArray *exceptionDates = [[NSMutableArray alloc] init];
-        NSMutableArray<MXLCalendarAttendee> *attendees = (NSMutableArray<MXLCalendarAttendee> *)[[NSMutableArray alloc] init];
-
-        // Extract event time zone ID
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"DTSTART;TZID=" intoString:nil];
-        [eventScanner scanUpToString:@":" intoString:&timezoneIDString];
-        timezoneIDString = [[timezoneIDString stringByReplacingOccurrencesOfString:@"DTSTART;TZID=" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
-
-        if (!timezoneIDString) {
-            // Extract event time zone ID
-            eventScanner = [NSScanner scannerWithString:event];
-            [eventScanner scanUpToString:@"TZID:" intoString:nil];
-            [eventScanner scanUpToString:@"\n" intoString:&timezoneIDString];
-            timezoneIDString = [[timezoneIDString stringByReplacingOccurrencesOfString:@"TZID:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
-        }
-
-        // Extract start time
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:[NSString stringWithFormat:@"DTSTART;TZID=%@:", timezoneIDString] intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&startDateTimeString];
-        startDateTimeString = [[startDateTimeString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"DTSTART;TZID=%@:", timezoneIDString] withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        if (!startDateTimeString) {
-            eventScanner = [NSScanner scannerWithString:event];
-            [eventScanner scanUpToString:@"DTSTART:" intoString:nil];
-            [eventScanner scanUpToString:@"\n" intoString:&startDateTimeString];
-            startDateTimeString = [[startDateTimeString stringByReplacingOccurrencesOfString:@"DTSTART:" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-            
-            if (!startDateTimeString) {
-                eventScanner = [NSScanner scannerWithString:event];
-                [eventScanner scanUpToString:@"DTSTART;VALUE=DATE:" intoString:nil];
-                [eventScanner scanUpToString:@"\n" intoString:&startDateTimeString];
-                startDateTimeString = [[startDateTimeString stringByReplacingOccurrencesOfString:@"DTSTART;VALUE=DATE:" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-            }
-        }
+    // For each event string, extract the data
+    for (NSString *eventString in eventsArray) {
         
-        // Extract end time
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:[NSString stringWithFormat:@"DTEND;TZID=%@:", timezoneIDString] intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&endDateTimeString];
-        endDateTimeString = [[endDateTimeString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"DTEND;TZID=%@:", timezoneIDString] withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-        
-        if (!endDateTimeString) {
-            eventScanner = [NSScanner scannerWithString:event];
-            [eventScanner scanUpToString:@"DTEND:" intoString:nil];
-            [eventScanner scanUpToString:@"\n" intoString:&endDateTimeString];
-            endDateTimeString = [[endDateTimeString stringByReplacingOccurrencesOfString:@"DTEND:" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-            
-            if (!endDateTimeString) {
-                eventScanner = [NSScanner scannerWithString:event];
-                [eventScanner scanUpToString:@"DTEND;VALUE=DATE:" intoString:nil];
-                [eventScanner scanUpToString:@"\n" intoString:&endDateTimeString];
-                endDateTimeString = [[endDateTimeString stringByReplacingOccurrencesOfString:@"DTEND;VALUE=DATE:" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-            }
-        }
-
-        // Extract timestamp
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"DTSTAMP:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&timeStampString];
-        timeStampString = [[timeStampString stringByReplacingOccurrencesOfString:@"DTSTAMP:" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the unique ID
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"UID:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&eventUniqueIDString];
-        eventUniqueIDString = [[eventUniqueIDString stringByReplacingOccurrencesOfString:@"UID:" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the attendees
-        eventScanner = [NSScanner scannerWithString:event];
-        bool scannerStatus;
-        do {
-            NSString *attendeeString;
-            if ([eventScanner scanUpToString:@"ATTENDEE;" intoString:nil]) {
-                scannerStatus = [eventScanner scanUpToString:@"\n" intoString:&attendeeString];
-                if (scannerStatus) {
-                    attendeeString = [[attendeeString stringByReplacingOccurrencesOfString:@"ATTENDEE;" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-                    MXLCalendarAttendee *attendee = [self createAttendee:attendeeString];
-                    if (attendee) {
-                        [attendees addObject:attendee];
-                    }
-                }
-            } else {
-                scannerStatus = false;
-            }
-        } while (scannerStatus);
-
-        // Extract the recurrance ID
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:[NSString stringWithFormat:@"RECURRENCE-ID;TZID=%@:", timezoneIDString] intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&recurrenceIDString];
-        recurrenceIDString = [[recurrenceIDString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"RECURRENCE-ID;TZID=%@:", timezoneIDString] withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the created datetime
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"CREATED:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&createdDateTimeString];
-        createdDateTimeString = [[createdDateTimeString stringByReplacingOccurrencesOfString:@"CREATED:" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-
-        // Extract event description
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"DESCRIPTION:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&descriptionString];
-        descriptionString = [[[descriptionString stringByReplacingOccurrencesOfString:@"DESCRIPTION:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract last modified datetime
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"LAST-MODIFIED:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&lastModifiedDateTimeString];
-        lastModifiedDateTimeString = [[[lastModifiedDateTimeString stringByReplacingOccurrencesOfString:@"LAST-MODIFIED:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the event location
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"LOCATION:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&locationString];
-        locationString = [[[locationString stringByReplacingOccurrencesOfString:@"LOCATION:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the event sequence
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"SEQUENCE:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&sequenceString];
-        sequenceString = [[[sequenceString stringByReplacingOccurrencesOfString:@"SEQUENCE:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the event status
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"STATUS:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&statusString];
-        statusString = [[[statusString stringByReplacingOccurrencesOfString:@"STATUS:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the event summary
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"SUMMARY:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&summaryString];
-        summaryString = [[[summaryString stringByReplacingOccurrencesOfString:@"SUMMARY:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the event transString
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"TRANSP:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&transString];
-        transString = [[[transString stringByReplacingOccurrencesOfString:@"TRANSP:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the event repetition rules
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"RRULE:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&repetitionString];
-        repetitionString = [[[repetitionString stringByReplacingOccurrencesOfString:@"RRULE:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Extract the event exception rules
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"EXRULE:" intoString:nil];
-        [eventScanner scanUpToString:@"\n" intoString:&exceptionRuleString];
-        exceptionRuleString = [[[exceptionRuleString stringByReplacingOccurrencesOfString:@"EXRULE:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-        // Set up scanner for
-        eventScanner = [NSScanner scannerWithString:event];
-        [eventScanner scanUpToString:@"EXDATE;" intoString:nil];
-
-        while (![eventScanner isAtEnd]) {
-            [eventScanner scanUpToString:@":" intoString:nil];
-            NSString *exceptionString = [[NSString alloc] init];
-            [eventScanner scanUpToString:@"\n" intoString:&exceptionString];
-            exceptionString = [[[exceptionString stringByReplacingOccurrencesOfString:@":" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-
-            if (exceptionString) {
-                [exceptionDates addObject:exceptionString];
-            }
-
-            [eventScanner scanUpToString:@"EXDATE;" intoString:nil];
-        }
-
-        MXLCalendarEvent *event = [[MXLCalendarEvent alloc] initWithStartDate:startDateTimeString
-                                                                      endDate:endDateTimeString
-                                                                    createdAt:createdDateTimeString
-                                                                 lastModified:lastModifiedDateTimeString
-                                                                     uniqueID:eventUniqueIDString
-                                                                 recurrenceID:recurrenceIDString
-                                                                      summary:summaryString
-                                                                  description:descriptionString
-                                                                     location:locationString
-                                                                       status:statusString
-                                                              recurrenceRules:repetitionString
-                                                               exceptionDates:exceptionDates
-                                                                exceptionRule:exceptionRuleString
-                                                           timeZoneIdentifier:timezoneIDString ? timezoneIDString : calendarString
-                                                                    attendees:attendees];
-        [calendar addEvent:event];
-
+        [calendar addEvent:[PUEventParser parseEventWithICSEventString:eventString inCalendarContext:calendarString]];
     }
 
-    callback(calendar, nil);
+    completionHandler(calendar, nil);
 }
+
 
 @end

@@ -8,20 +8,34 @@
 
 #import <Foundation/Foundation.h>
 
+typedef NS_ENUM(NSInteger, PUAttendeeRole) {
+    
+    PUAttendeeRoleChair,
+    PUAttendeeRoleRequiredParticipant,
+    PUAttendeeRoleOptionalParticipant,
+    PUAttendeeRoleNonParticipant
+    
+};
+
 typedef enum {
-    CHAIR, REQ_PARTICIPANT, OPT_PARTICIPANT, NON_PARTICIPANT
-}Role;
+    
+    CHAIR,
+    REQ_PARTICIPANT,
+    OPT_PARTICIPANT,
+    NON_PARTICIPANT
+    
+} Role;
 
-@protocol MXLCalendarAttendee
+//@protocol MXLCalendarAttendee
+//
+//@end
+@interface MXLCalendarAttendee : NSObject <NSCopying>
 
-@end
-@interface MXLCalendarAttendee : NSObject
+@property (nonatomic, copy) NSString *uri;
+@property (nonatomic, copy) NSString *commonName;
+@property (nonatomic, assign) PUAttendeeRole role;
 
-@property (strong, nonatomic) NSString *uri;
-@property (strong, nonatomic) NSString *commonName;
-@property (nonatomic) Role role;
+- (id)initWithRole:(PUAttendeeRole)role commonName:(NSString *)commonName andUri:(NSString *)uri;
++ (instancetype)attendeeForString:(NSString *)attendeeString;
 
--(id) initWithRole: (Role) role
-        commonName: (NSString *) commonName
-               uri: (NSString *) uri;
 @end

@@ -27,19 +27,15 @@
 
 @class MXLCalendarEvent;
 
-@interface MXLCalendar : NSObject {
-    NSMutableDictionary *daysOfEvents;
-    NSMutableDictionary *loadedEvents;
-    
-    NSCalendar *calendar;
-}
-@property (strong, nonatomic) NSTimeZone *timeZone;
-@property (strong, nonatomic) NSMutableArray *events;
+@interface PUCalendar : NSObject <NSCopying>
+
+@property (nonatomic, retain) NSTimeZone *timeZone;
+@property (nonatomic, retain) NSArray *events;
 
 - (void)addEvent:(MXLCalendarEvent *)event;
 
-- (void)addEvent:(MXLCalendarEvent *)event onDay:(NSInteger)day month:(NSInteger)month year:(NSInteger)year;
-- (void)addEvent:(MXLCalendarEvent *)event onDateString:(NSString *)dateString;
+- (void)addEvent:(MXLCalendarEvent *)event onDateWithDay:(NSInteger)day month:(NSInteger)month andYear:(NSInteger)year;
+- (void)addEvent:(MXLCalendarEvent *)event onDateRepresentedAsString:(NSString *)dateString;
 - (void)addEvent:(MXLCalendarEvent *)event onDate:(NSDate *)date;
 
 - (BOOL)hasLoadedAllEventsForDate:(NSDate *)date;
@@ -47,3 +43,5 @@
 - (NSMutableArray *)eventsForDate:(NSDate *)date;
 
 @end
+//Keep compatibility to MXLCalendar
+@compatibility_alias MXLCalendar PUCalendar;
