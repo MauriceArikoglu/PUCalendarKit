@@ -23,7 +23,7 @@
 //  THE SOFTWARE.
 
 #import "PUCalendar.h"
-#import "MXLCalendarEvent.h"
+#import "PUCalendarEvent.h"
 
 @interface PUCalendar ()
 
@@ -67,14 +67,14 @@
     return self;
 }
 
-- (void)addEvent:(MXLCalendarEvent *)event {
+- (void)addEvent:(PUCalendarEvent *)event {
     
     NSMutableArray *mutableEvents = [NSMutableArray arrayWithArray:self.events.mutableCopy];
     [mutableEvents addObject:event];
     self.events = mutableEvents.copy;
 }
 
-- (void)addEvent:(MXLCalendarEvent *)event onDateWithDay:(NSInteger)day month:(NSInteger)month andYear:(NSInteger)year {
+- (void)addEvent:(PUCalendarEvent *)event onDateWithDay:(NSInteger)day month:(NSInteger)month andYear:(NSInteger)year {
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"dd-MM-yyyy"];
@@ -89,11 +89,11 @@
     [self addEvent:event onDateRepresentedAsString:[dateFormatter stringFromDate:[[NSCalendar currentCalendar] dateFromComponents:components]]];
 }
 
-- (void)addEvent:(MXLCalendarEvent *)event onDateRepresentedAsString:(NSString *)dateString {
+- (void)addEvent:(PUCalendarEvent *)event onDateRepresentedAsString:(NSString *)dateString {
     // Check if the event has already been logged today
-    for (MXLCalendarEvent *currentEvent in self.daysOfEvents[dateString]) {
+    for (PUCalendarEvent *currentEvent in self.daysOfEvents[dateString]) {
         
-        if ([currentEvent.eventUniqueID isEqualToString:event.eventUniqueID]) {
+        if ([currentEvent.eventUniqueId isEqualToString:event.eventUniqueId]) {
             
             return;
         }
@@ -121,7 +121,7 @@
     }
 }
 
-- (void)addEvent:(MXLCalendarEvent *)event onDate:(NSDate *)date {
+- (void)addEvent:(PUCalendarEvent *)event onDate:(NSDate *)date {
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"dd-MM-yyyy"];
@@ -157,8 +157,8 @@
     //Create a sorted copy of the events for date
     NSMutableArray *mutableEventsToSetAndReturn = [NSMutableArray arrayWithArray:[mutableEventsForDay sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
 
-        MXLCalendarEvent *firstEvent = obj1;
-        MXLCalendarEvent *secondEvent = obj2;
+        PUCalendarEvent *firstEvent = obj1;
+        PUCalendarEvent *secondEvent = obj2;
 
 //        NSDateComponents *firstComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:firstEvent.eventStartDate];
 //        NSDateComponents *secondComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:secondEvent.eventStartDate];

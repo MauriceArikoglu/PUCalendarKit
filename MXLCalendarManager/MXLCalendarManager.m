@@ -38,6 +38,18 @@
 
 @implementation MXLCalendarManager
 
++ (instancetype)sharedManager {
+    
+    static MXLCalendarManager *_sharedManager = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        
+        _sharedManager = [[MXLCalendarManager alloc] init];
+    });
+    
+    return _sharedManager;
+}
+
 - (void)scanICSFileAtRemoteURL:(NSURL *)fileURL withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler {
     
     #if TARGET_OS_IPHONE

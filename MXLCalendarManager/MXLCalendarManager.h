@@ -26,14 +26,16 @@
 #import <Foundation/Foundation.h>
 
 #import "PUCalendar.h"
-#import "MXLCalendarEvent.h"
+#import "PUCalendarEvent.h"
 
 @interface MXLCalendarManager : NSObject
 
-- (void)parseICSString:(NSString *)icsString withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler;
++ (instancetype)sharedManager;
 
-- (void)scanICSFileAtRemoteURL:(NSURL *)fileURL withCompletionHandler:(void (^)(MXLCalendar *calendar, NSError *error))completionHandler;
+- (void)parseICSString:(NSString *)icsString withCompletionHandler:(void (^)(PUCalendar *, NSError *))completionHandler;
 
-- (void)scanICSFileAtLocalPath:(NSString *)filePath withCompletionHandler:(void (^)(MXLCalendar *calendar, NSError *error))completionHandler;
+- (void)scanICSFileAtRemoteURL:(NSURL *)fileURL withCompletionHandler:(void (^)(PUCalendar *calendar, NSError *error))completionHandler;
+
+- (void)scanICSFileAtLocalPath:(NSString *)filePath withCompletionHandler:(void (^)(PUCalendar *calendar, NSError *error))completionHandler;
 
 @end

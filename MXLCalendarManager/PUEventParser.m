@@ -1,17 +1,252 @@
 //
 //  PUEventParser.m
-//  ICSExporter
 //
 //  Created by Maurice Arikoglu on 16.11.17.
-//  Copyright © 2017 MobileX Labs. All rights reserved.
+//  Copyright © 2017 Maurice Arikoglu. All rights reserved.
 //
 
 #import "PUEventParser.h"
-#import "MXLCalendarEvent.h"
+#import "PUCalendarEvent.h"
+#import "PUExceptionRules.h"
+#import "PURecurrenceRules.h"
+#import "NSDateFormatter+ICS.h"
 
 @implementation PUEventParser
 
-+ (MXLCalendarEvent *)parseEventWithICSEventString:(NSString *)eventString inCalendarContext:(NSString *)calendarContext {
+#pragma mark - Parsing ICS Event Recurrence Rules
+
++ (PURecurrenceRules *)parseRecurrenceRulesWithICSEventRecurrenceRuleString:(NSString *)recurrenceRuleString inCalendarContext:(NSString *)calendarContext {
+    
+    PURecurrenceRules *recurrenceRules = PURecurrenceRules.new;
+    
+    NSArray *rulesArray = [recurrenceRuleString componentsSeparatedByString:@";"]; // Split up rules string into array
+
+    for (NSString *rule in rulesArray) {
+        
+        if ([rule rangeOfString:@"FREQ"].location != NSNotFound) {
+            // If the rule is for the FREQuency
+            recurrenceRules.repeatRuleFrequency = [PUEventParser parseFrequencyRule:rule];
+            
+        } else if ([rule rangeOfString:@"COUNT"].location != NSNotFound) {
+            // If the rule is for the COUNT
+            recurrenceRules.repeatRuleCount = [PUEventParser parseCountRule:rule];
+            
+        } else if ([rule rangeOfString:@"UNTIL"].location != NSNotFound) {
+            // If the rule is for the UNTIL date
+            NSString *parsedRule = [PUEventParser parseUntilRule:rule];
+            NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:parsedRule];
+            dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:calendarContext]) ?: [NSTimeZone localTimeZone];
+
+            recurrenceRules.repeatRuleUntilDate = [dateFormatter dateFromString:parsedRule];
+            
+        } else if ([rule rangeOfString:@"INTERVAL"].location != NSNotFound) {
+            // If the rule is for the INTERVAL
+            recurrenceRules.repeatRuleInterval = [PUEventParser parseIntervalRule:rule];
+            
+        } else if ([rule rangeOfString:@"BYDAY"].location != NSNotFound) {
+            // If the rule is for the BYDAY
+            recurrenceRules.repeatRulesByDay = [[PUEventParser parseByDayRule:rule] componentsSeparatedByString:@","];
+            
+        } else if ([rule rangeOfString:@"BYMONTHDAY"].location != NSNotFound) {
+            // If the rule is for the BYMONTHDAY
+            recurrenceRules.repeatRulesByDayOfMonth = [[PUEventParser parseByDayOfMonthRule:rule] componentsSeparatedByString:@","];
+            
+        } else if ([rule rangeOfString:@"BYYEARDAY"].location != NSNotFound) {
+            // If the rule is for the BYYEARDAY
+            recurrenceRules.repeatRulesByDayOfYear = [[PUEventParser parseByDayOfYearRule:rule] componentsSeparatedByString:@","];
+            
+        } else  if ([rule rangeOfString:@"BYWEEKNO"].location != NSNotFound) {
+            // If the rule is for the BYWEEKNO
+            recurrenceRules.repeatRulesByWeekOfYear = [[PUEventParser parseWeekOfYearRule:rule] componentsSeparatedByString:@","];
+            
+        } else if ([rule rangeOfString:@"BYMONTH"].location != NSNotFound) {
+            // If the rule is for the BYMONTH
+            recurrenceRules.repeatRulesByMonth = [[PUEventParser parseByMonthRule:rule] componentsSeparatedByString:@","];
+            
+        } else if ([rule rangeOfString:@"WKST"].location != NSNotFound) {
+            // If the rule is for the WKST
+            recurrenceRules.repeatRuleWeekStart = [PUEventParser parseWeekStartRule:rule];
+        }
+    }
+
+    return recurrenceRules;
+}
+
+#pragma mark - Parsing ICS Event Exception Rules
+
++ (PUExceptionRules *)parseExceptionRulesWithICSEventExceptionRuleString:(NSString *)exceptionRuleString inCalendarContext:(NSString *)calendarContext{
+    
+    PUExceptionRules *exceptionRules = PUExceptionRules.new;
+    
+    NSArray *rulesArray = [exceptionRuleString componentsSeparatedByString:@";"]; // Split up rules string into array
+
+    for (NSString *rule in rulesArray) {
+        
+        if ([rule rangeOfString:@"FREQ"].location != NSNotFound) {
+            // If the rule is for the FREQuency
+            exceptionRules.exceptionRuleFrequency = [PUEventParser parseFrequencyRule:rule];
+            
+        } else if ([rule rangeOfString:@"COUNT"].location != NSNotFound) {
+            // If the rule is for the COUNT
+            exceptionRules.exceptionRuleCount = [PUEventParser parseCountRule:rule];
+            
+        } else if ([rule rangeOfString:@"UNTIL"].location != NSNotFound) {
+            // If the rule is for the UNTIL date
+            NSString *parsedRule = [PUEventParser parseUntilRule:rule];
+            
+            NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:parsedRule];
+            dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:calendarContext]) ?: [NSTimeZone localTimeZone];
+            
+            exceptionRules.exceptionRuleUntilDate = [dateFormatter dateFromString:parsedRule];
+            
+        } else if ([rule rangeOfString:@"INTERVAL"].location != NSNotFound) {
+            // If the rule is for the INTERVAL
+            exceptionRules.exceptionRuleInterval = [PUEventParser parseIntervalRule:rule];
+            
+        } else if ([rule rangeOfString:@"BYDAY"].location != NSNotFound) {
+            // If the rule is for the BYDAY
+            exceptionRules.exceptionRulesByDay = [[PUEventParser parseByDayRule:rule] componentsSeparatedByString:@","];
+            
+        } else if ([rule rangeOfString:@"BYMONTHDAY"].location != NSNotFound) {
+            // If the rule is for the BYMONTHDAY
+            exceptionRules.exceptionRulesByDayOfMonth = [[PUEventParser parseByDayOfMonthRule:rule] componentsSeparatedByString:@","];
+            
+        } else if ([rule rangeOfString:@"BYYEARDAY"].location != NSNotFound) {
+            // If the rule is for the BYYEARDAY
+            exceptionRules.exceptionRulesByDayOfYear = [[PUEventParser parseByDayOfYearRule:rule] componentsSeparatedByString:@","];
+            
+        } else  if ([rule rangeOfString:@"BYWEEKNO"].location != NSNotFound) {
+            // If the rule is for the BYWEEKNO
+            exceptionRules.exceptionRulesByWeekOfYear = [[PUEventParser parseWeekOfYearRule:rule] componentsSeparatedByString:@","];
+            
+        } else if ([rule rangeOfString:@"BYMONTH"].location != NSNotFound) {
+            // If the rule is for the BYMONTH
+            exceptionRules.exceptionRulesByMonth = [[PUEventParser parseByMonthRule:rule] componentsSeparatedByString:@","];
+            
+        } else if ([rule rangeOfString:@"WKST"].location != NSNotFound) {
+            // If the rule is for the WKST
+            exceptionRules.exceptionRuleWeekStart = [PUEventParser parseWeekStartRule:rule];
+        }
+    }
+
+    return exceptionRules;
+}
+
+#pragma mark - Parsing ICS Event Rule Properties
+
++ (NSString *)parseFrequencyRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *frequency;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&frequency];
+    
+    return [frequency stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
++ (NSString *)parseWeekStartRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *weekStart;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&weekStart];
+    
+    return [weekStart stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
++ (NSString *)parseCountRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *count;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&count];
+    
+    return [count stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
++ (NSString *)parseUntilRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *until;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&until];
+
+    return [until stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
++ (NSString *)parseIntervalRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *interval;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&interval];
+
+    return [interval stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
++ (NSString *)parseByDayRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *byDay;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&byDay];
+
+    return [byDay stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
++ (NSString *)parseByDayOfMonthRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *byMonthDay;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&byMonthDay];
+
+    return [byMonthDay stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
++ (NSString *)parseByDayOfYearRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *byYearDay;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&byYearDay];
+
+    return [byYearDay stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
++ (NSString *)parseWeekOfYearRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *byWeekNo;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&byWeekNo];
+
+    return [byWeekNo stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
++ (NSString *)parseByMonthRule:(NSString *)weekStartRule {
+    
+    NSScanner *ruleScanner = [[NSScanner alloc] initWithString:weekStartRule];
+    NSString *byMonth;
+    
+    [ruleScanner scanUpToString:@"=" intoString:nil];
+    [ruleScanner scanUpToString:@";" intoString:&byMonth];
+
+    return [byMonth stringByReplacingOccurrencesOfString:@"=" withString:@""];
+}
+
+#pragma mark - Parsing ICS Events
+
++ (PUCalendarEvent *)parseEventWithICSEventString:(NSString *)eventString inCalendarContext:(NSString *)calendarContext {
     
     if (!eventString) {
         
@@ -64,7 +299,7 @@
     NSString *transparentString = [self extractTransparentInformationFromICSEventString:eventString];
     
     // Extract the event repetition rules
-    NSString *repetitionString = [self extractRepetitionInformationFromICSEventString:eventString];
+    NSString *recurrenceRuleString = [self extractRepetitionInformationFromICSEventString:eventString];
     
     // Extract the event exception rules
     NSString *exceptionRuleString = [self extractExceptionInformationFromICSEventString:eventString];
@@ -72,24 +307,26 @@
     // Extract event exception dates
     NSArray *exceptionDates = [self extractExceptionDateInformationFromICSEventString:eventString];
     
-    MXLCalendarEvent *event = [[MXLCalendarEvent alloc] initWithStartDate:startDateTimeString
-                                                                  endDate:endDateTimeString
-                                                                createdAt:createdDateTimeString
-                                                             lastModified:lastModifiedDateTimeString
-                                                                 uniqueID:eventUniqueIdString
-                                                             recurrenceID:recurrenceIdString
-                                                                  summary:summaryString
-                                                              description:descriptionString
-                                                                 location:locationString
-                                                                   status:statusString
-                                                          recurrenceRules:repetitionString
-                                                           exceptionDates:exceptionDates
-                                                            exceptionRule:exceptionRuleString
-                                                       timeZoneIdentifier:timezoneIdString ?: calendarContext
-                                                                attendees:attendees];
-
+    PUCalendarEvent *event = [[PUCalendarEvent alloc] initWithStartDate:startDateTimeString
+                                                                endDate:endDateTimeString
+                                                              createdAt:createdDateTimeString
+                                                           lastModified:lastModifiedDateTimeString
+                                                               uniqueId:eventUniqueIdString
+                                                           recurrenceId:recurrenceIdString
+                                                                summary:summaryString
+                                                            description:descriptionString
+                                                               location:locationString
+                                                                 status:statusString
+                                                        recurrenceRules:recurrenceRuleString
+                                                         exceptionDates:exceptionDates
+                                                          exceptionRule:exceptionRuleString
+                                                             timeZoneId:timezoneIdString ?: calendarContext
+                                                              attendees:attendees];
+    
     return event;
 }
+
+#pragma mark - Parsing ICS Event Properties
 
 + (NSArray *)extractExceptionDateInformationFromICSEventString:(NSString *)extractString {
     

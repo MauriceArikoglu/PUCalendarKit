@@ -24,18 +24,18 @@
 
 #import <Foundation/Foundation.h>
 
-@class MXLCalendarEvent;
+@class PUCalendarEvent;
 
 @interface PUCalendar : NSObject <NSCopying>
 
 @property (nonatomic, retain) NSTimeZone *timeZone;
 @property (nonatomic, retain) NSArray *events;
 
-- (void)addEvent:(MXLCalendarEvent *)event;
+- (void)addEvent:(PUCalendarEvent *)event;
 
-- (void)addEvent:(MXLCalendarEvent *)event onDateWithDay:(NSInteger)day month:(NSInteger)month andYear:(NSInteger)year;
-- (void)addEvent:(MXLCalendarEvent *)event onDateRepresentedAsString:(NSString *)dateString;
-- (void)addEvent:(MXLCalendarEvent *)event onDate:(NSDate *)date;
+- (void)addEvent:(PUCalendarEvent *)event onDateWithDay:(NSInteger)day month:(NSInteger)month andYear:(NSInteger)year;
+- (void)addEvent:(PUCalendarEvent *)event onDateRepresentedAsString:(NSString *)dateString;
+- (void)addEvent:(PUCalendarEvent *)event onDate:(NSDate *)date;
 
 - (BOOL)hasLoadedAllEventsForDate:(NSDate *)date;
 - (void)loadedAllEventsForDate:(NSDate *)date;
