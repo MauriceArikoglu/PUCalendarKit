@@ -52,7 +52,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
 
 @property (nonatomic, retain) NSCalendar *calendar;
 
-@property (nonatomic, copy) NSString *repeatRuleString;
+//@property (nonatomic, copy) NSString *repeatRuleString;
 
 @property (nonatomic, copy) PUExceptionRules *exceptionRules;
 @property (nonatomic, copy) PURecurrenceRules *recurrenceRules;
@@ -72,7 +72,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         [copy setDateFormatterHumanReadable:[self.dateFormatterHumanReadable copyWithZone:zone]];
         [copy setEventExceptionDates:[self.eventExceptionDates copyWithZone:zone]];
         [copy setCalendar:[self.calendar copyWithZone:zone]];
-        [copy setRepeatRuleString:[self.repeatRuleString copyWithZone:zone]];
+//        [copy setRepeatRuleString:[self.repeatRuleString copyWithZone:zone]];
         
         [copy setExceptionRules:[self.exceptionRules copyWithZone:zone]];
         [copy setRecurrenceRules:[self.recurrenceRules copyWithZone:zone]];
@@ -102,21 +102,22 @@ static NSString *const kDayOfWeekSaturday = @"SA";
     return copy;
 }
 
-- (id)initWithStartDate:(NSString *)startString
-                endDate:(NSString *)endString
-              createdAt:(NSString *)createdString
-           lastModified:(NSString *)lastModifiedString
+- (id)initWithStartDate:(NSDate *)startDate
+           eventEndDate:(NSDate *)endDate
+          eventIsAllDay:(BOOL)isAllDay
+            createdDate:(NSDate *)createdDate
+       lastModifiedDate:(NSDate *)lastModifiedDate
                uniqueId:(NSString *)uniqueId
            recurrenceId:(NSString *)recurrenceId
-                summary:(NSString *)summary
-            description:(NSString *)description
-               location:(NSString *)location
-                 status:(PUStatus)status
-        recurrenceRules:(NSString *)recurrenceRules
+         summaryOrTitle:(NSString *)summary
+       eventDescription:(NSString *)description
+          eventLocation:(NSString *)location
+            eventStatus:(PUStatus)status
+        recurrenceRules:(PURecurrenceRules *)recurrenceRules
+         exceptionRules:(PUExceptionRules *)exceptionRules
          exceptionDates:(NSArray *)exceptionDates
-          exceptionRule:(NSString *)exceptionRule
-             timeZoneId:(NSString *)timeZoneId
-              attendees:(NSArray<PUEventAttendee *> *)attendees {
+               timeZone:(NSString *)timeZoneAbbreviationOrId
+         eventAttendees:(NSArray<PUEventAttendee *> *)attendees {
 
     self = [super init];
 
@@ -127,41 +128,24 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         // Set up the shared NSDateFormatter instance to convert the ics formatted strings to NSDate objects
         self.dateFormatterICS = NSDateFormatter.new;
         self.dateFormatterICS.dateFormat = @"yyyyMMddTHHmmss";
-        self.dateFormatterICS.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
+        self.dateFormatterICS.timeZone = ([NSTimeZone timeZoneWithName:timeZoneAbbreviationOrId]) ?: [NSTimeZone localTimeZone];
         
         self.dateFormatterHumanReadable = NSDateFormatter.new;
         self.dateFormatterHumanReadable.dateFormat = @"dd-MM-yyyy HH:mm:ss";
-        self.dateFormatterHumanReadable.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
+        self.dateFormatterHumanReadable.timeZone = ([NSTimeZone timeZoneWithName:timeZoneAbbreviationOrId]) ?: [NSTimeZone localTimeZone];
 
-        // Format the start Date
-        NSDateFormatter *startDateFormatter = [NSDateFormatter dateFormatterForICSDateString:&startString];
-        startDateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
-        self.eventStartDate = [startDateFormatter dateFromString:startString];
+        self.eventStartDate = startDate;
+        self.eventEndDate = endDate;
 
-        //Format the end Date
-        NSDateFormatter *endDateFormatter = [NSDateFormatter dateFormatterForICSDateString:&endString];
-        endDateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
-        self.eventEndDate = [endDateFormatter dateFromString:endString];
-
-        //The Event is Allday when either startDate or endDate dont have a time
-        self.eventIsAllDay = !(startDateFormatter.containsTime && endDateFormatter.containsTime);
+        self.eventIsAllDay = isAllDay;
         
-        //Format the created Date
-        NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:&createdString];
-        dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
-        self.eventCreatedDate = [dateFormatter dateFromString:createdString];
+        self.eventCreatedDate = createdDate;
         
-        //Format the last modified Date
-        dateFormatter = [NSDateFormatter dateFormatterForICSDateString:&lastModifiedString];
-        dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
-        self.eventLastModifiedDate = [dateFormatter dateFromString:lastModifiedString];
-
-        self.repeatRuleString = recurrenceRules;
-
-        self.recurrenceRules = [PUEventParser parseRecurrenceRulesWithICSEventRecurrenceRuleString:recurrenceRules inCalendarContext:timeZoneId];
-        self.exceptionRules = [PUEventParser parseExceptionRulesWithICSEventExceptionRuleString:exceptionRule inCalendarContext:timeZoneId];
+        self.eventLastModifiedDate = lastModifiedDate;
         
-        // Set the rest of the properties
+        self.recurrenceRules = recurrenceRules;
+        self.exceptionRules = exceptionRules;
+        
         self.eventUniqueId = uniqueId;
         self.eventRecurrenceId  = recurrenceId;
         self.eventSummary = [summary stringByReplacingOccurrencesOfString:@"\\" withString:@""];

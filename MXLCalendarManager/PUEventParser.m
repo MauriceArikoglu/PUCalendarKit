@@ -256,25 +256,25 @@
     }
     
     //Extract Time Zone
-    NSString *timezoneIdString = [self extractTimeZoneInformationFromICSEventString:eventString];
+    NSString *timeZoneIdString = [self extractTimeZoneInformationFromICSEventString:eventString];
     
     //Extract Event Start Date
-    NSString *startDateTimeString = [self extractStartDateInformationFromICSEventString:eventString withTimeZoneString:timezoneIdString];
+    NSString *startDateTimeString = [self extractStartDateInformationFromICSEventString:eventString withTimeZoneString:timeZoneIdString];
     
     //Extract Event End Date
-    NSString *endDateTimeString = [self extractEndDateInformationFromICSEventString:eventString withTimeZoneString:timezoneIdString];
+    NSString *endDateTimeString = [self extractEndDateInformationFromICSEventString:eventString withTimeZoneString:timeZoneIdString];
     
     // Extract Event Timestamp
     NSString __unused *timeStampString = [self extractTimeStampInformationFromICSEventString:eventString];
     
     // Extract Event Unique Id
-    NSString *eventUniqueIdString = [self extractUniqueIdInformationFromICSEventString:eventString];
+    NSString *uniqueIdString = [self extractUniqueIdInformationFromICSEventString:eventString];
     
     // Extract the attendees
     NSArray <PUEventAttendee *> *attendees = [self extractAttendeesInformationFromICSEventString:eventString];
     
     // Extract the recurrence Id
-    NSString *recurrenceIdString = [self extractRecurrenceInformationFromICSEventString:eventString withTimeZoneString:timezoneIdString];
+    NSString *recurrenceIdString = [self extractRecurrenceInformationFromICSEventString:eventString withTimeZoneString:timeZoneIdString];
     
     // Extract the created datetime
     NSString *createdDateTimeString = [self extractCreatedDateInformationFromICSEventString:eventString];
@@ -309,23 +309,52 @@
     // Extract event exception dates
     NSArray *exceptionDates = [self extractExceptionDateInformationFromICSEventString:eventString];
     
-    PUCalendarEvent *event = [[PUCalendarEvent alloc] initWithStartDate:startDateTimeString
-                                                                endDate:endDateTimeString
-                                                              createdAt:createdDateTimeString
-                                                           lastModified:lastModifiedDateTimeString
-                                                               uniqueId:eventUniqueIdString
-                                                           recurrenceId:recurrenceIdString
-                                                                summary:summaryString
-                                                            description:descriptionString
-                                                               location:locationString
-                                                                 status:[statusString statusForICSStatusString]
-                                                        recurrenceRules:recurrenceRuleString
-                                                         exceptionDates:exceptionDates
-                                                          exceptionRule:exceptionRuleString
-                                                             timeZoneId:timezoneIdString ?: calendarContext
-                                                              attendees:attendees];
+    // Format the start Date
+    NSDateFormatter *startDateFormatter = [NSDateFormatter dateFormatterForICSDateString:&startDateTimeString];
+    startDateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneIdString]) ?: [NSTimeZone localTimeZone];
+
+    NSDate *startDate = [startDateFormatter dateFromString:startDateTimeString];
     
-    return event;
+    //Format the end Date
+    NSDateFormatter *endDateFormatter = [NSDateFormatter dateFormatterForICSDateString:&endDateTimeString];
+    endDateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneIdString]) ?: [NSTimeZone localTimeZone];
+
+    NSDate *endDate = [endDateFormatter dateFromString:endDateTimeString];
+    
+    //Format the created Date
+    NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:&createdDateTimeString];
+    dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneIdString]) ?: [NSTimeZone localTimeZone];
+
+    NSDate *createdDate = [dateFormatter dateFromString:createdDateTimeString];
+    
+    //Format the last modified Date
+    dateFormatter = [NSDateFormatter dateFormatterForICSDateString:&lastModifiedDateTimeString];
+    dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneIdString]) ?: [NSTimeZone localTimeZone];
+
+    NSDate *lastModifiedDate = [dateFormatter dateFromString:lastModifiedDateTimeString];
+
+    PURecurrenceRules *recurrenceRules = [PUEventParser parseRecurrenceRulesWithICSEventRecurrenceRuleString:recurrenceRuleString inCalendarContext:timeZoneIdString];
+    PUExceptionRules *exceptionRules = [PUEventParser parseExceptionRulesWithICSEventExceptionRuleString:exceptionRuleString inCalendarContext:timeZoneIdString];
+    
+    //The Event is Allday when either startDate or endDate dont have a time
+    PUCalendarEvent *parsedEvent = [[PUCalendarEvent alloc] initWithStartDate:startDate
+                                                                 eventEndDate:endDate
+                                                                eventIsAllDay:!(startDateFormatter.containsTime && endDateFormatter.containsTime)
+                                                                  createdDate:createdDate
+                                                             lastModifiedDate:lastModifiedDate
+                                                                     uniqueId:uniqueIdString
+                                                                 recurrenceId:recurrenceIdString
+                                                               summaryOrTitle:summaryString
+                                                             eventDescription:descriptionString
+                                                                eventLocation:locationString
+                                                                  eventStatus:[statusString statusForICSStatusString]
+                                                              recurrenceRules:recurrenceRules
+                                                               exceptionRules:exceptionRules
+                                                               exceptionDates:exceptionDates
+                                                                     timeZone:timeZoneIdString
+                                                               eventAttendees:attendees];
+    
+    return parsedEvent;
 }
 
 #pragma mark - Parsing ICS Event Properties

@@ -29,6 +29,7 @@
 @class EKEvent;
 @class EKEventStore;
 
+@class PURecurrenceRules, PUExceptionRules;
 @interface PUCalendarEvent : NSObject <NSCopying>
 
 @property (nonatomic, retain) NSDate *eventStartDate;
@@ -48,21 +49,22 @@
 
 @property (nonatomic, retain) NSArray<PUEventAttendee *> *eventAttendees;
 
-- (id)initWithStartDate:(NSString *)startString
-                endDate:(NSString *)endString
-              createdAt:(NSString *)createdString
-           lastModified:(NSString *)lastModifiedString
+- (id)initWithStartDate:(NSDate *)startDate
+           eventEndDate:(NSDate *)endDate
+          eventIsAllDay:(BOOL)isAllDay
+            createdDate:(NSDate *)createdDate
+       lastModifiedDate:(NSDate *)lastModifiedDate
                uniqueId:(NSString *)uniqueId
            recurrenceId:(NSString *)recurrenceId
-                summary:(NSString *)summary
-            description:(NSString *)description
-               location:(NSString *)location
-                 status:(PUStatus)status
-        recurrenceRules:(NSString *)recurrenceRules
+         summaryOrTitle:(NSString *)summary
+       eventDescription:(NSString *)description
+          eventLocation:(NSString *)location
+            eventStatus:(PUStatus)status
+        recurrenceRules:(PURecurrenceRules *)recurrenceRules
+         exceptionRules:(PUExceptionRules *)exceptionRules
          exceptionDates:(NSArray *)exceptionDates
-          exceptionRule:(NSString *)exceptionRule
-             timeZoneId:(NSString *)timeZoneId
-              attendees:(NSArray<PUEventAttendee *> *)attendees;
+               timeZone:(NSString *)timeZoneAbbreviationOrId
+         eventAttendees:(NSArray<PUEventAttendee *> *)attendees;
 
 - (NSDate *)dateFromString:(NSString *)dateString;
 
