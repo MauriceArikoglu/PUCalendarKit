@@ -10,10 +10,24 @@
 
 @implementation NSString (PUCalendarICSEnumerations)
 
+- (PUStatus)statusForICSStatusString {
+    
+    /*
+     ICS status strings as found here https://www.kanzaki.com/docs/ical/status.html
+     */
+    NSDictionary<NSString*,NSNumber*> *status = @{
+                                                  @"TENTATIVE" : @(PUStatusTentative),
+                                                  @"CONFIRMED" : @(PUStatusConfirmed),
+                                                  @"CANCELLED" : @(PUStatusCancelled)
+                                                  };
+    
+    return status[self].integerValue;
+}
+
 - (PUFrequency)frequencyForICSFrequencyString {
     
     /*
-     ICS Role strings as found here https://www.kanzaki.com/docs/ical/recur.html
+     ICS frequency strings as found here https://www.kanzaki.com/docs/ical/recur.html
      */
     NSDictionary<NSString*,NSNumber*> *frequencies = @{
                                                        @"SECONDLY" : @(PUFrequencySecondly),

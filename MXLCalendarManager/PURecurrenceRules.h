@@ -11,21 +11,22 @@
 @interface PURecurrenceRules : NSObject <NSCopying>
 
 @property (nonatomic, assign) PUFrequency repeatRuleFrequency;
-@property (nonatomic, copy) NSString *repeatRuleCount;
 
-@property (nonatomic, copy) NSString *repeatRuleInterval;
+@property (nonatomic, assign) NSInteger repeatRuleCount;
+@property (nonatomic, assign) NSInteger repeatRuleInterval;
+
 @property (nonatomic, copy) NSString *repeatRuleWeekStart;
 
 @property (nonatomic, copy) NSDate *repeatRuleUntilDate;
 
-@property (nonatomic, retain) NSArray *repeatRulesBySecond;
-@property (nonatomic, retain) NSArray *repeatRulesByMinute;
-@property (nonatomic, retain) NSArray *repeatRulesByHour;
-@property (nonatomic, retain) NSArray *repeatRulesByDay;
-@property (nonatomic, retain) NSArray *repeatRulesByDayOfMonth;
-@property (nonatomic, retain) NSArray *repeatRulesByDayOfYear;
-@property (nonatomic, retain) NSArray *repeatRulesByWeekOfYear;
-@property (nonatomic, retain) NSArray *repeatRulesByMonth;
-@property (nonatomic, retain) NSArray *repeatRulesBySetPosition;
+@property (nonatomic, retain) NSArray <NSString *>*repeatRulesBySecond;
+@property (nonatomic, retain) NSArray <NSString *>*repeatRulesByMinute;
+@property (nonatomic, retain) NSArray <NSString *>*repeatRulesByHour;
+@property (nonatomic, retain) NSArray <NSString *>*repeatRulesByDay;
+@property (nonatomic, retain) NSArray <NSString *>*repeatRulesByDayOfMonth;
+@property (nonatomic, retain) NSArray <NSString *>*repeatRulesByDayOfYear;
+@property (nonatomic, retain) NSArray <NSString *>*repeatRulesByWeekOfYear;
+@property (nonatomic, retain) NSArray <NSString *>*repeatRulesByMonth;
+@property (nonatomic, retain) NSArray <NSString *>*repeatRulesBySetPosition;
 
 @end

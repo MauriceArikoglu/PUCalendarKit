@@ -8,7 +8,7 @@
 
 #import "CalendarViewController.h"
 #import "MBProgressHUD.h"
-#import "MXLCalendarManager.h"
+#import "PUCalendarManager.h"
 
 @interface CalendarViewController () <UITableViewDataSource>
 
@@ -82,7 +82,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [currentEvents count];
+    return currentEvents.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -121,14 +121,14 @@
             
             // For this initial check, all we need to know is whether there's at least ONE event on each day, nothing more.
             // So we loop through each event...
-            for (MXLCalendarEvent *event in currentCalendar.events) {
+            for (PUCalendarEvent *event in currentCalendar.events) {
                 
                 NSDateComponents *components = [[NSCalendar currentCalendar] components:NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit fromDate:[event eventStartDate]];
                 
                 // If the event starts this month, add it to the array
                 if ([components month] == currentDateComponents.month && [components year] == currentDateComponents.year) {
                     [daysArray addObject:[NSNumber numberWithInteger:[components day]]];
-                    [currentCalendar addEvent:event onDateString:[dateFormatter stringFromDate:[event eventStartDate]]];
+                    [currentCalendar addEvent:event onDateRepresentedAsString:[dateFormatter stringFromDate:[event eventStartDate]]];
                 } else {
                     NSCalendar *cal = [NSCalendar currentCalendar];
                     NSRange rng = [cal rangeOfUnit:NSDayCalendarUnit inUnit:NSMonthCalendarUnit forDate:currentDate];
@@ -142,8 +142,9 @@
                         
                         if (![daysArray containsObject:[NSNumber numberWithInt:i]]) {
                             if ([event checkDay:i month:currentDateComponents.month year:currentDateComponents.year]) {
+                                
                                 [daysArray addObject:[NSNumber numberWithInteger:i]];
-                                [currentCalendar addEvent:event onDay:i month:currentDateComponents.month year:currentDateComponents.year];
+                                [currentCalendar addEvent:event onDateWithDay:i month:currentDateComponents.month andYear:currentDateComponents.year];
                             }
                         }
                     }
@@ -350,8 +351,8 @@
     MXLCalendarManager *calendarManager = [[MXLCalendarManager alloc] init];
     
     [calendarManager scanICSFileAtLocalPath:[[NSBundle mainBundle] pathForResource:@"basic" ofType:@"ics"]
-                      withCompletionHandler:^(MXLCalendar *calendar, NSError *error) {
-                          currentCalendar = [[MXLCalendar alloc] init];
+                      withCompletionHandler:^(PUCalendar *calendar, NSError *error) {
+                          currentCalendar = [[PUCalendar alloc] init];
                           currentCalendar = calendar;
                           
                           dispatch_async(dispatch_get_main_queue(), ^{
@@ -402,7 +403,7 @@
         // If the day hasn't already loaded events...
         if (![currentCalendar hasLoadedAllEventsForDate:date]) {
             // Loop through each event and check whether it occurs on the selected date
-            for (MXLCalendarEvent *event in currentCalendar.events) {
+            for (PUCalendarEvent *event in currentCalendar.events) {
                 // If it does, save it for the date
                 if ([event checkDate:date]) {
                     [currentCalendar addEvent:event onDate:date];

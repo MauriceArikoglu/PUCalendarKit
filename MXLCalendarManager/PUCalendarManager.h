@@ -1,9 +1,8 @@
 //
-//  MXLCalendarManager.h
-//  Part of MXLCalendarManager framework
+//  PUCalendarManager.h
 //
-//  Created by Kiran Panesar on 09/04/2013.
-//  Copyright (c) 2013 MobileX Labs. All rights reserved.
+//  Created by Maurice Arikoglu, based on MXLCalendarManager Framework by Kiran Panesar created on 09/04/2013.
+//  Copyright (c) 2017 Maurice Arikoglu. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +27,7 @@
 #import "PUCalendar.h"
 #import "PUCalendarEvent.h"
 
-@interface MXLCalendarManager : NSObject
+@interface PUCalendarManager : NSObject
 
 + (instancetype)sharedManager;
 
@@ -39,3 +38,4 @@
 - (void)scanICSFileAtLocalPath:(NSString *)filePath withCompletionHandler:(void (^)(PUCalendar *calendar, NSError *error))completionHandler;
 
 @end
+@compatibility_alias MXLCalendarManager PUCalendarManager;

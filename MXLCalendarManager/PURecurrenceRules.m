@@ -16,8 +16,8 @@
     if (copy) {
         
         [copy setRepeatRuleFrequency:self.repeatRuleFrequency];
-        [copy setRepeatRuleCount:[self.repeatRuleCount copyWithZone:zone]];
-        [copy setRepeatRuleInterval:[self.repeatRuleInterval copyWithZone:zone]];
+        [copy setRepeatRuleCount:self.repeatRuleCount];
+        [copy setRepeatRuleInterval:self.repeatRuleInterval];
         [copy setRepeatRuleWeekStart:[self.repeatRuleWeekStart copyWithZone:zone]];
         
         [copy setRepeatRuleUntilDate:[self.repeatRuleUntilDate copyWithZone:zone]];

@@ -9,10 +9,10 @@
 #import <UIKit/UIKit.h>
 
 #import "JTCalendar.h"
-#import "MXLCalendar.h"
+#import "PUCalendar.h"
 
 @interface CalendarViewController : UIViewController <JTCalendarDataSource> {
-    MXLCalendar *currentCalendar;
+    PUCalendar *currentCalendar;
     
     NSDate *selectedDate;
     NSMutableDictionary *savedDates;

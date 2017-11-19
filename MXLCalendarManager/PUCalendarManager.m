@@ -1,9 +1,8 @@
 //
-//  MXLCalendarManager.m
-//  Part of MXLCalendarManager framework
+//  PUCalendarManager.m
 //
-//  Created by Kiran Panesar on 09/04/2013.
-//  Copyright (c) 2013 MobileX Labs. All rights reserved.
+//  Created by Maurice Arikoglu, based on MXLCalendarManager Framework by Kiran Panesar created on 09/04/2013.
+//  Copyright (c) 2017 Maurice Arikoglu. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -23,50 +22,48 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#import "MXLCalendarManager.h"
+#import "PUCalendarManager.h"
 #import "PUEventParser.h"
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
 #endif
 
-@interface MXLCalendarManager ()
-
-//- (void)parseICSString:(NSString *)icsString withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler;
+@interface PUCalendarManager ()
 
 @end
 
-@implementation MXLCalendarManager
+@implementation PUCalendarManager
 
 + (instancetype)sharedManager {
     
-    static MXLCalendarManager *_sharedManager = nil;
+    static PUCalendarManager *_sharedManager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         
-        _sharedManager = [[MXLCalendarManager alloc] init];
+        _sharedManager = [[PUCalendarManager alloc] init];
     });
     
     return _sharedManager;
 }
 
-- (void)scanICSFileAtRemoteURL:(NSURL *)fileURL withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler {
+- (void)scanICSFileAtRemoteURL:(NSURL *)fileURL withCompletionHandler:(void (^)(PUCalendar *, NSError *))completionHandler {
     
-    #if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
     if (NSThread.currentThread.isMainThread) {
         
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     }
-    #endif
-
+#endif
+    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
         NSError *downloadError;
         NSData *fileData = [[NSData alloc] initWithContentsOfURL:fileURL options:0 error:&downloadError];
-
+        
         if (downloadError) {
             //Hide device network indicator and return error
-            #if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
             if ([[UIApplication sharedApplication] isNetworkActivityIndicatorVisible]) {
                 
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -74,19 +71,19 @@
                     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
                 });
             }
-            #endif
+#endif
             
             return completionHandler(nil, downloadError);
         }
-
+        
         dispatch_async(dispatch_get_main_queue(), ^{
             //Hide device network indicator
-            #if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
             if ([[UIApplication sharedApplication] isNetworkActivityIndicatorVisible]) {
                 
                 [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
             }
-            #endif
+#endif
             
             //Parse the ICS File String Representation
             NSString *fileString = [[NSString alloc] initWithData:fileData encoding:NSUTF8StringEncoding];
@@ -95,7 +92,7 @@
     });
 }
 
-- (void)scanICSFileAtLocalPath:(NSString *)filePath withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler {
+- (void)scanICSFileAtLocalPath:(NSString *)filePath withCompletionHandler:(void (^)(PUCalendar *, NSError *))completionHandler {
     
     NSError *fileError;
     NSString *calendarFile = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&fileError];
@@ -108,11 +105,7 @@
     [self parseICSString:calendarFile withCompletionHandler:completionHandler];
 }
 
-- (void)parseICSString:(NSString *)icsString withCompletionHandler:(void (^)(MXLCalendar *, NSError *))completionHandler {
-
-//    NSError *error = nil;
-//    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\n +" options:NSRegularExpressionCaseInsensitive error:&error];
-//    NSString *icsStringWithoutNewlines = [regex stringByReplacingMatchesInString:icsString options:0 range:NSMakeRange(0, [icsString length]) withTemplate:@""];
+- (void)parseICSString:(NSString *)icsString withCompletionHandler:(void (^)(PUCalendar *, NSError *))completionHandler {
 
     //Remove whitespaces and newline characters
     NSString *icsStringWithoutNewlines = [icsString stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
@@ -120,7 +113,7 @@
     // Pull out each line from the calendar file
     NSMutableArray *eventsArray = [NSMutableArray arrayWithArray:[icsStringWithoutNewlines componentsSeparatedByString:@"BEGIN:VEVENT"]];
 
-    MXLCalendar *calendar = [[MXLCalendar alloc] init];
+    PUCalendar *calendar = [[PUCalendar alloc] init];
 
     NSString *calendarString;
 
@@ -174,8 +167,6 @@
         
         [scanner scanUpToString:@"TZID:" intoString:nil];
         [scanner scanUpToString:@"\n" intoString:&calendarString];
-
-//        calendarString = [[[calendarString stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""] stringByReplacingOccurrencesOfString:@"TZID:" withString:@""];
 
         calendarString = [[calendarString stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet] stringByReplacingOccurrencesOfString:@"TZID:" withString:@""];
 

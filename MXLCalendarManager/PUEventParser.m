@@ -31,7 +31,7 @@
             
         } else if ([rule rangeOfString:@"COUNT"].location != NSNotFound) {
             // If the rule is for the COUNT
-            recurrenceRules.repeatRuleCount = [PUEventParser parseCountRule:rule];
+            recurrenceRules.repeatRuleCount = [PUEventParser parseCountRule:rule].integerValue;
             
         } else if ([rule rangeOfString:@"UNTIL"].location != NSNotFound) {
             // If the rule is for the UNTIL date
@@ -43,7 +43,7 @@
             
         } else if ([rule rangeOfString:@"INTERVAL"].location != NSNotFound) {
             // If the rule is for the INTERVAL
-            recurrenceRules.repeatRuleInterval = [PUEventParser parseIntervalRule:rule];
+            recurrenceRules.repeatRuleInterval = [PUEventParser parseIntervalRule:rule].integerValue;
             
         } else if ([rule rangeOfString:@"BYDAY"].location != NSNotFound) {
             // If the rule is for the BYDAY
@@ -90,7 +90,7 @@
             
         } else if ([rule rangeOfString:@"COUNT"].location != NSNotFound) {
             // If the rule is for the COUNT
-            exceptionRules.exceptionRuleCount = [PUEventParser parseCountRule:rule];
+            exceptionRules.exceptionRuleCount = [PUEventParser parseCountRule:rule].integerValue;
             
         } else if ([rule rangeOfString:@"UNTIL"].location != NSNotFound) {
             // If the rule is for the UNTIL date
@@ -103,7 +103,7 @@
             
         } else if ([rule rangeOfString:@"INTERVAL"].location != NSNotFound) {
             // If the rule is for the INTERVAL
-            exceptionRules.exceptionRuleInterval = [PUEventParser parseIntervalRule:rule];
+            exceptionRules.exceptionRuleInterval = [PUEventParser parseIntervalRule:rule].integerValue;
             
         } else if ([rule rangeOfString:@"BYDAY"].location != NSNotFound) {
             // If the rule is for the BYDAY
@@ -265,7 +265,7 @@
     NSString *endDateTimeString = [self extractEndDateInformationFromICSEventString:eventString withTimeZoneString:timezoneIdString];
     
     // Extract Event Timestamp
-    NSString *timeStampString = [self extractTimeStampInformationFromICSEventString:eventString];
+    NSString __unused *timeStampString = [self extractTimeStampInformationFromICSEventString:eventString];
     
     // Extract Event Unique Id
     NSString *eventUniqueIdString = [self extractUniqueIdInformationFromICSEventString:eventString];
@@ -289,7 +289,7 @@
     NSString *locationString = [self extractLocationInformationFromICSEventString:eventString];
     
     // Extract the event sequence
-    NSString *sequenceString = [self extractSequenceInformationFromICSEventString:eventString];
+    NSString __unused *sequenceString = [self extractSequenceInformationFromICSEventString:eventString];
     
     // Extract the event status
     NSString *statusString = [self extractStatusInformationFromICSEventString:eventString];
@@ -298,7 +298,7 @@
     NSString *summaryString = [self extractSummaryInformationFromICSEventString:eventString];
     
     // Extract the event transString
-    NSString *transparentString = [self extractTransparentInformationFromICSEventString:eventString];
+    NSString __unused *transparentString = [self extractTransparentInformationFromICSEventString:eventString];
     
     // Extract the event repetition rules
     NSString *recurrenceRuleString = [self extractRepetitionInformationFromICSEventString:eventString];

@@ -11,21 +11,22 @@
 @interface PUExceptionRules : NSObject <NSCopying>
 
 @property (nonatomic, assign) PUFrequency exceptionRuleFrequency;
-@property (nonatomic, copy) NSString *exceptionRuleCount;
 
-@property (nonatomic, copy) NSString *exceptionRuleInterval;
+@property (nonatomic, assign) NSInteger exceptionRuleCount;
+@property (nonatomic, assign) NSInteger exceptionRuleInterval;
+
 @property (nonatomic, copy) NSString *exceptionRuleWeekStart;
 
-@property (nonatomic, copy) NSDate   *exceptionRuleUntilDate;
+@property (nonatomic, copy) NSDate *exceptionRuleUntilDate;
 
-@property (nonatomic, retain) NSArray *exceptionRulesBySecond;
-@property (nonatomic, retain) NSArray *exceptionRulesByMinute;
-@property (nonatomic, retain) NSArray *exceptionRulesByHour;
-@property (nonatomic, retain) NSArray *exceptionRulesByDay;
-@property (nonatomic, retain) NSArray *exceptionRulesByDayOfMonth;
-@property (nonatomic, retain) NSArray *exceptionRulesByDayOfYear;
-@property (nonatomic, retain) NSArray *exceptionRulesByWeekOfYear;
-@property (nonatomic, retain) NSArray *exceptionRulesByMonth;
-@property (nonatomic, retain) NSArray *exceptionRulesBySetPosition;
+@property (nonatomic, retain) NSArray <NSString *>*exceptionRulesBySecond;
+@property (nonatomic, retain) NSArray <NSString *>*exceptionRulesByMinute;
+@property (nonatomic, retain) NSArray <NSString *>*exceptionRulesByHour;
+@property (nonatomic, retain) NSArray <NSString *>*exceptionRulesByDay;
+@property (nonatomic, retain) NSArray <NSString *>*exceptionRulesByDayOfMonth;
+@property (nonatomic, retain) NSArray <NSString *>*exceptionRulesByDayOfYear;
+@property (nonatomic, retain) NSArray <NSString *>*exceptionRulesByWeekOfYear;
+@property (nonatomic, retain) NSArray <NSString *>*exceptionRulesByMonth;
+@property (nonatomic, retain) NSArray <NSString *>*exceptionRulesBySetPosition;
 
 @end

@@ -271,7 +271,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
 
     // If there's no repetition interval provided, it means the interval = 1.
     // We explicitly set it to "1" for use in calculations below
-    self.recurrenceRules.repeatRuleInterval = self.recurrenceRules.repeatRuleInterval ? : @"1";
+    self.recurrenceRules.repeatRuleInterval = (self.recurrenceRules.repeatRuleInterval == 0) ? 1 : self.recurrenceRules.repeatRuleInterval;
 
     // If it's set to repeat weekly...
     if (self.recurrenceRules.repeatRuleFrequency == PUFrequencyWeekly) {
@@ -282,7 +282,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
 
             // Get the final possible time the event will be repeated
             NSDateComponents *finalDateComponents = [[NSDateComponents alloc] init];
-            finalDateComponents.day = self.recurrenceRules.repeatRuleCount.integerValue * self.recurrenceRules.repeatRuleInterval.integerValue;
+            finalDateComponents.day = self.recurrenceRules.repeatRuleCount * self.recurrenceRules.repeatRuleInterval;
             
             // Create a date by adding the final week it'll occur onto the first occurrence
             NSDate *maximumDate = [self.calendar dateByAddingComponents:finalDateComponents toDate:self.eventCreatedDate options:0];
@@ -294,7 +294,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:maximumDate toDate:date options:0].day;
 
                 // If the difference between the two dates fits the recurrence pattern
-                if (difference % self.recurrenceRules.repeatRuleInterval.integerValue) {
+                if (difference % self.recurrenceRules.repeatRuleInterval) {
                     // If it doesn't fit into the pattern, it won't occur on this date
                     return NO;
                 } else {
@@ -315,7 +315,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:self.recurrenceRules.repeatRuleUntilDate toDate:date options:0].day;
 
                 // If the difference between the two dates fits the recurrence pattern
-                if (difference % self.recurrenceRules.repeatRuleInterval.integerValue) {
+                if (difference % self.recurrenceRules.repeatRuleInterval) {
                     // if not, event won't occur on date
                     return NO;
                 } else {
@@ -330,7 +330,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             // If there's no recurrence limit, we just have to check if the
             NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:self.eventCreatedDate toDate:date options:0].day;
             
-            if (difference % self.recurrenceRules.repeatRuleInterval.integerValue) {
+            if (difference % self.recurrenceRules.repeatRuleInterval) {
                 
                 return NO;
             } else {
@@ -343,7 +343,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         
         if (self.recurrenceRules.repeatRuleCount) {
 
-            NSInteger finalMonth = self.recurrenceRules.repeatRuleCount.integerValue * self.recurrenceRules.repeatRuleInterval.integerValue;
+            NSInteger finalMonth = self.recurrenceRules.repeatRuleCount * self.recurrenceRules.repeatRuleInterval;
 
             NSDateComponents *finalDateComponents = [[NSDateComponents alloc] init];
             finalDateComponents.month = finalMonth;
@@ -355,7 +355,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 
                 NSInteger difference = [[self.calendar components:NSCalendarUnitMonth fromDate:[self.calendar dateFromComponents:finalDateComponents] toDate:date options:0] month];
                 
-                if (difference % self.recurrenceRules.repeatRuleInterval.integerValue) {
+                if (difference % self.recurrenceRules.repeatRuleInterval) {
                     
                     return NO;
                 } else {
@@ -373,7 +373,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 
                 NSInteger difference = [self.calendar components:NSCalendarUnitMonth fromDate:self.recurrenceRules.repeatRuleUntilDate toDate:date options:0].month;
 
-                if (difference % self.recurrenceRules.repeatRuleInterval.integerValue) {
+                if (difference % self.recurrenceRules.repeatRuleInterval) {
                     
                     return NO;
                 } else {
@@ -388,7 +388,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             
             NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:self.eventCreatedDate toDate:date options:0].month;
             
-            if (difference % self.recurrenceRules.repeatRuleInterval.integerValue) {
+            if (difference % self.recurrenceRules.repeatRuleInterval) {
                 
                 return NO;
             } else {
@@ -400,7 +400,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         
         if (self.recurrenceRules.repeatRuleCount) {
             
-            NSInteger finalYear = self.recurrenceRules.repeatRuleCount.integerValue * self.recurrenceRules.repeatRuleInterval.integerValue;
+            NSInteger finalYear = self.recurrenceRules.repeatRuleCount * self.recurrenceRules.repeatRuleInterval;
 
             NSDateComponents *finalDateComponents = [[NSDateComponents alloc] init];
             finalDateComponents.year = finalYear;
@@ -412,7 +412,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 
                 NSInteger difference = [self.calendar components:NSCalendarUnitYear fromDate:[self.calendar dateFromComponents:finalDateComponents] toDate:date options:0].year;
 
-                if (difference % self.recurrenceRules.repeatRuleInterval.integerValue) {
+                if (difference % self.recurrenceRules.repeatRuleInterval) {
                     
                     return NO;
                 } else {
@@ -424,7 +424,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             
             NSInteger difference = [self.calendar components:NSCalendarUnitYear fromDate:self.recurrenceRules.repeatRuleUntilDate toDate:date options:0].year;
 
-            if (difference % self.recurrenceRules.repeatRuleInterval.integerValue) {
+            if (difference % self.recurrenceRules.repeatRuleInterval) {
                 
                 return NO;
             } else {
@@ -435,7 +435,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             
             NSInteger difference = [self.calendar components:NSCalendarUnitYear fromDate:self.eventCreatedDate toDate:date options:0].year;
             
-            if (difference % self.recurrenceRules.repeatRuleInterval.integerValue) {
+            if (difference % self.recurrenceRules.repeatRuleInterval) {
                 
                 return NO;
             } else {
@@ -505,7 +505,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             return NO;
         }
 
-    self.exceptionRules.exceptionRuleInterval = self.exceptionRules.exceptionRuleInterval ? : @"1";
+    self.exceptionRules.exceptionRuleInterval = (self.exceptionRules.exceptionRuleInterval == 0) ? 1 : self.exceptionRules.exceptionRuleInterval;
 
     // If it's set to repeat every week...
     if (self.exceptionRules.exceptionRuleFrequency == PUFrequencyWeekly) {
@@ -516,7 +516,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
 
             // Get the final possible time the event will be repeated
             NSDateComponents *maximumComponents = [[NSDateComponents alloc] init];
-            maximumComponents.day = self.exceptionRules.exceptionRuleCount.integerValue * self.exceptionRules.exceptionRuleInterval.integerValue;
+            maximumComponents.day = self.exceptionRules.exceptionRuleCount * self.exceptionRules.exceptionRuleInterval;
 
             // Create a date by adding the final week it'll occur onto the first occurrence
             NSDate *maximumDate = [self.calendar dateByAddingComponents:maximumComponents toDate:self.eventCreatedDate options:0];
@@ -528,7 +528,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 // Get the number of weeks between the final date and current date
                 NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:maximumDate toDate:date options:0].day;
 
-                return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
+                return !(difference % self.exceptionRules.exceptionRuleInterval);
             } else {
                 
                 return NO;
@@ -540,7 +540,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 
                 NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:self.exceptionRules.exceptionRuleUntilDate toDate:date options:0].day;
 
-                return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
+                return !(difference % self.exceptionRules.exceptionRuleInterval);
             } else {
                 return NO;
             }
@@ -548,13 +548,13 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             
             NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:self.eventCreatedDate toDate:date options:0].day;
 
-            return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
+            return !(difference % self.exceptionRules.exceptionRuleInterval);
         }
     } else if (self.exceptionRules.exceptionRuleFrequency == PUFrequencyMonthly) {
         
         if (self.exceptionRules.exceptionRuleCount) {
 
-            NSInteger finalMonth = self.exceptionRules.exceptionRuleCount.integerValue * self.exceptionRules.exceptionRuleInterval.integerValue;
+            NSInteger finalMonth = self.exceptionRules.exceptionRuleCount * self.exceptionRules.exceptionRuleInterval;
 
             NSDateComponents *maximumComponents = [[NSDateComponents alloc] init];
             maximumComponents.month = finalMonth;
@@ -566,7 +566,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 
                 NSInteger difference = [self.calendar components:NSCalendarUnitMonth fromDate:[self.calendar dateFromComponents:maximumComponents] toDate:date options:0].month;
 
-                return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
+                return !(difference % self.exceptionRules.exceptionRuleInterval);
             } else {
                 return NO;
             }
@@ -577,7 +577,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 
                 NSInteger difference = [self.calendar components:NSCalendarUnitMonth fromDate:self.exceptionRules.exceptionRuleUntilDate toDate:date options:0].month;
 
-                return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
+                return !(difference % self.exceptionRules.exceptionRuleInterval);
             } else {
                 return NO;
             }
@@ -585,13 +585,13 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             
             NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:self.eventCreatedDate toDate:date options:0].month;
 
-            return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
+            return !(difference % self.exceptionRules.exceptionRuleInterval);
         }
     } else if (self.exceptionRules.exceptionRuleFrequency == PUFrequencyYearly) {
         
         if (self.exceptionRules.exceptionRuleCount) {
             
-            NSInteger finalYear = self.exceptionRules.exceptionRuleCount.integerValue * self.exceptionRules.exceptionRuleInterval.integerValue;
+            NSInteger finalYear = self.exceptionRules.exceptionRuleCount * self.exceptionRules.exceptionRuleInterval;
 
             NSDateComponents *maximumComponents = [[NSDateComponents alloc] init];
             maximumComponents.year = finalYear;
@@ -603,18 +603,18 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 
                 NSInteger difference = [self.calendar components:NSCalendarUnitYear fromDate:[self.calendar dateFromComponents:maximumComponents] toDate:date options:0].year;
 
-                return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
+                return !(difference % self.exceptionRules.exceptionRuleInterval);
             }
         } else if (self.exceptionRules.exceptionRuleUntilDate) {
             
             NSInteger difference = [self.calendar components:NSCalendarUnitYear fromDate:self.exceptionRules.exceptionRuleUntilDate toDate:date options:0].year;
 
-            return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
+            return !(difference % self.exceptionRules.exceptionRuleInterval);
         } else {
             
             NSInteger difference = [self.calendar components:NSCalendarUnitYear fromDate:self.eventCreatedDate toDate:date options:0].year;
             
-            return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
+            return !(difference % self.exceptionRules.exceptionRuleInterval);
         }
     } else {
         

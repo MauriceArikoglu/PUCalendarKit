@@ -17,8 +17,8 @@
         
         [copy setExceptionRuleFrequency:self.exceptionRuleFrequency];
         
-        [copy setExceptionRuleCount:[self.exceptionRuleCount copyWithZone:zone]];
-        [copy setExceptionRuleInterval:[self.exceptionRuleInterval copyWithZone:zone]];
+        [copy setExceptionRuleCount:self.exceptionRuleCount];
+        [copy setExceptionRuleInterval:self.exceptionRuleInterval];
         [copy setExceptionRuleWeekStart:[self.exceptionRuleWeekStart copyWithZone:zone]];
 
         [copy setExceptionRuleUntilDate:[self.exceptionRuleUntilDate copyWithZone:zone]];

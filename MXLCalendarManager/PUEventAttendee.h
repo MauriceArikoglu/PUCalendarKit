@@ -12,6 +12,7 @@
 
 @property (nonatomic, copy) NSString *uri;
 @property (nonatomic, copy) NSString *commonName;
+
 @property (nonatomic, assign) PURole role;
 
 - (id)initWithRole:(PURole)role commonName:(NSString *)commonName andUri:(NSString *)uri;

@@ -31,6 +31,14 @@ typedef NS_ENUM(NSInteger, PUFrequency) {
     PUFrequencyYearly
     
 };
+
+typedef NS_ENUM(NSInteger, PUStatus) {
+    
+    PUStatusTentative,
+    PUStatusConfirmed,
+    PUStatusCancelled
+    
+};
 /*
 typedef NS_ENUM(NSInteger, PUShortWeekday) {
     //Gregorian Calendar 1-7

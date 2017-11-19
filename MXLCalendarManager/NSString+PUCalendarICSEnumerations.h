@@ -13,5 +13,6 @@
 
 - (PURole)roleForICSRoleString;
 - (PUFrequency)frequencyForICSFrequencyString;
+- (PUStatus)statusForICSStatusString;
 //- (PUShortWeekday)shortWeekdayForICDWeekdayString;
 @end
