@@ -318,7 +318,7 @@
                                                                 summary:summaryString
                                                             description:descriptionString
                                                                location:locationString
-                                                                 status:statusString
+                                                                 status:[statusString statusForICSStatusString]
                                                         recurrenceRules:recurrenceRuleString
                                                          exceptionDates:exceptionDates
                                                           exceptionRule:exceptionRuleString
@@ -329,6 +329,7 @@
 }
 
 #pragma mark - Parsing ICS Event Properties
+#pragma mark - Exception Dates
 
 + (NSArray *)extractExceptionDateInformationFromICSEventString:(NSString *)extractString {
     
@@ -359,6 +360,8 @@
     return exceptionDates.copy;
 }
 
+#pragma mark - Exception Rules
+
 + (NSString *)extractExceptionInformationFromICSEventString:(NSString *)extractString {
     
     NSString *exceptionRuleString;
@@ -371,6 +374,8 @@
     
     return [[exceptionRuleString stringByReplacingOccurrencesOfString:@"EXRULE:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
+
+#pragma mark - Recurrence Rules
 
 + (NSString *)extractRepetitionInformationFromICSEventString:(NSString *)extractString {
     
@@ -385,6 +390,8 @@
     return [[repetitionString stringByReplacingOccurrencesOfString:@"RRULE:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
+#pragma mark - Transparent
+
 + (NSString *)extractTransparentInformationFromICSEventString:(NSString *)extractString {
     
     NSString *transparentString;
@@ -397,6 +404,8 @@
     
     return [[transparentString stringByReplacingOccurrencesOfString:@"TRANSP:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
+
+#pragma mark - Summary
 
 + (NSString *)extractSummaryInformationFromICSEventString:(NSString *)extractString {
     
@@ -411,6 +420,8 @@
     return [[summaryString stringByReplacingOccurrencesOfString:@"SUMMARY:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
+#pragma mark - Status
+
 + (NSString *)extractStatusInformationFromICSEventString:(NSString *)extractString {
     
     NSString *statusString;
@@ -423,6 +434,8 @@
     
     return [[statusString stringByReplacingOccurrencesOfString:@"STATUS:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
+
+#pragma mark - Sequence
 
 + (NSString *)extractSequenceInformationFromICSEventString:(NSString *)extractString {
     
@@ -437,6 +450,8 @@
     return [[sequenceString stringByReplacingOccurrencesOfString:@"SEQUENCE:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
+#pragma mark - Location
+
 + (NSString *)extractLocationInformationFromICSEventString:(NSString *)extractString {
     
     NSString *locationString;
@@ -449,6 +464,8 @@
     
     return [[locationString stringByReplacingOccurrencesOfString:@"LOCATION:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
+
+#pragma mark - Last Modified Date
 
 + (NSString *)extractLastModifiedInformationFromICSEventString:(NSString *)extractString {
     
@@ -463,6 +480,8 @@
     return [[lastModifiedDateTimeString stringByReplacingOccurrencesOfString:@"LAST-MODIFIED:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
+#pragma mark - Description
+
 + (NSString *)extractDescriptionInformationFromICSEventString:(NSString *)extractString {
     
     NSString *descriptionString;
@@ -475,6 +494,8 @@
     
     return [[descriptionString stringByReplacingOccurrencesOfString:@"DESCRIPTION:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
+
+#pragma mark - Created Date
 
 + (NSString *)extractCreatedDateInformationFromICSEventString:(NSString *)extractString {
     
@@ -489,6 +510,8 @@
     return [[createdDateTimeString stringByReplacingOccurrencesOfString:@"CREATED:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
+#pragma mark - Recurrence
+
 + (NSString *)extractRecurrenceInformationFromICSEventString:(NSString *)extractString withTimeZoneString:(NSString *)timeZoneString {
     
     NSString *recurrenceString;
@@ -501,6 +524,8 @@
     
     return [[recurrenceString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"RECURRENCE-ID;TZID=%@:", timeZoneString] withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
+
+#pragma mark - Attendees
 
 + (NSArray <PUEventAttendee *>*)extractAttendeesInformationFromICSEventString:(NSString *)extractString {
     
@@ -541,6 +566,8 @@
     return attendees.copy;
 }
 
+#pragma mark - Unique Id
+
 + (NSString *)extractUniqueIdInformationFromICSEventString:(NSString *)extractString {
     
     NSString *eventUniqueIdString;
@@ -554,6 +581,8 @@
     return [[eventUniqueIdString stringByReplacingOccurrencesOfString:@"UID:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
+#pragma mark - Timestamp
+
 + (NSString *)extractTimeStampInformationFromICSEventString:(NSString *)extractString {
     
     NSString *timeStampString;
@@ -566,6 +595,8 @@
     
     return [[timeStampString stringByReplacingOccurrencesOfString:@"DTSTAMP:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
+
+#pragma mark - End Date
 
 + (NSString *)extractEndDateInformationFromICSEventString:(NSString *)extractString withTimeZoneString:(NSString *)timeZoneString {
     
@@ -602,6 +633,8 @@
     return endDateTimeString;
 }
 
+#pragma mark - Start Date
+
 + (NSString *)extractStartDateInformationFromICSEventString:(NSString *)extractString withTimeZoneString:(NSString *)timeZoneString {
     
     NSString *startDateTimeString;
@@ -636,6 +669,8 @@
     
     return startDateTimeString;
 }
+
+#pragma mark - Time Zone
 
 + (NSString *)extractTimeZoneInformationFromICSEventString:(NSString *)extractString {
     

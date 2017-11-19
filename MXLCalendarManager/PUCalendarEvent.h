@@ -24,6 +24,7 @@
 
 #import <Foundation/Foundation.h>
 #import "PUEventAttendee.h"
+#import "PUCalendarEnumerations.h"
 
 @class EKEvent;
 @class EKEventStore;
@@ -42,7 +43,8 @@
 @property (nonatomic, copy) NSString *eventSummary;
 @property (nonatomic, copy) NSString *eventDescription;
 @property (nonatomic, copy) NSString *eventLocation;
-@property (nonatomic, copy) NSString *eventStatus;
+
+@property (nonatomic, assign) PUStatus eventStatus;
 
 @property (nonatomic, retain) NSArray<PUEventAttendee *> *eventAttendees;
 
@@ -55,7 +57,7 @@
                 summary:(NSString *)summary
             description:(NSString *)description
                location:(NSString *)location
-                 status:(NSString *)status
+                 status:(PUStatus)status
         recurrenceRules:(NSString *)recurrenceRules
          exceptionDates:(NSArray *)exceptionDates
           exceptionRule:(NSString *)exceptionRule

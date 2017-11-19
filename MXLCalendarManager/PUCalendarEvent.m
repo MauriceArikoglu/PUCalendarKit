@@ -92,7 +92,8 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         [copy setEventSummary:[self.eventSummary copyWithZone:zone]];
         [copy setEventDescription:[self.eventDescription copyWithZone:zone]];
         [copy setEventLocation:[self.eventLocation copyWithZone:zone]];
-        [copy setEventStatus:[self.eventStatus copyWithZone:zone]];
+        
+        [copy setEventStatus:self.eventStatus];
 
         [copy setEventAttendees:[self.eventAttendees copyWithZone:zone]];
 
@@ -110,7 +111,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 summary:(NSString *)summary
             description:(NSString *)description
                location:(NSString *)location
-                 status:(NSString *)status
+                 status:(PUStatus)status
         recurrenceRules:(NSString *)recurrenceRules
          exceptionDates:(NSArray *)exceptionDates
           exceptionRule:(NSString *)exceptionRule
