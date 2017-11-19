@@ -15,14 +15,14 @@
     
     if (copy) {
         
-        [copy setRepeatRuleFrequency:[self.repeatRuleFrequency copyWithZone:zone]];
+        [copy setRepeatRuleFrequency:self.repeatRuleFrequency];
         [copy setRepeatRuleCount:[self.repeatRuleCount copyWithZone:zone]];
         [copy setRepeatRuleInterval:[self.repeatRuleInterval copyWithZone:zone]];
         [copy setRepeatRuleWeekStart:[self.repeatRuleWeekStart copyWithZone:zone]];
         
         [copy setRepeatRuleUntilDate:[self.repeatRuleUntilDate copyWithZone:zone]];
         
-        [copy setRepeatRulesBySecond:[self.repeatRuleFrequency copyWithZone:zone]];
+        [copy setRepeatRulesBySecond:[self.repeatRulesBySecond copyWithZone:zone]];
         [copy setRepeatRulesByMinute:[self.repeatRulesByMinute copyWithZone:zone]];
         [copy setRepeatRulesByHour:[self.repeatRulesByHour copyWithZone:zone]];
         [copy setRepeatRulesByDay:[self.repeatRulesByDay copyWithZone:zone]];

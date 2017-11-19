@@ -32,27 +32,27 @@
 }
 
 
-+ (instancetype)dateFormatterForICSDateString:(NSString *)dateString {
++ (instancetype)dateFormatterForICSDateString:(NSString **)dateString {
     
     NSDateFormatter *dateFormatter = NSDateFormatter.new;
     dateFormatter.dateFormat = @"yyyyMMdd HHmmss";
     dateFormatter.containsTime = YES;
     
-    dateString = [dateString stringByReplacingOccurrencesOfString:@"T" withString:@" "];
+    *dateString = [*dateString stringByReplacingOccurrencesOfString:@"T" withString:@" "];
     
-    dateFormatter.containsZone = [dateString rangeOfString:@"z" options:NSCaseInsensitiveSearch].location != NSNotFound;
+    dateFormatter.containsZone = [*dateString rangeOfString:@"z" options:NSCaseInsensitiveSearch].location != NSNotFound;
     
     if (dateFormatter.containsZone) {
         dateFormatter.dateFormat = @"yyyyMMdd HHmmssz";
     }
     
-    NSDate *date = [dateFormatter dateFromString:dateString];
+    NSDate *date = [dateFormatter dateFromString:*dateString];
     
     if (!date) {
         
         dateFormatter.dateFormat = (dateFormatter.containsZone) ? @"yyyyMMddz" : @"yyyyMMdd";
         
-        date = [dateFormatter dateFromString:dateString];
+        date = [dateFormatter dateFromString:*dateString];
         
         if (date) {
             dateFormatter.containsTime = NO;

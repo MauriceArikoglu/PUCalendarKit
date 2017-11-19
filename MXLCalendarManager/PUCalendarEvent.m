@@ -25,6 +25,7 @@
 //  THE SOFTWARE.
 
 #import "PUCalendarEvent.h"
+#import "PUCalendarEnumerations.h"
 
 #import <EventKit/EventKit.h>
 
@@ -34,10 +35,13 @@
 
 #import "NSDateFormatter+ICS.h"
 
-#define DAILY_FREQUENCY @"DAILY"
-#define WEEKLY_FREQUENCY @"WEEKLY"
-#define MONTHLY_FREQUENCY @"MONTHLY"
-#define YEARLY_FREQUENCY @"YEARLY"
+static NSString *const kDayOfWeekSunday = @"SU";
+static NSString *const kDayOfWeekMonday = @"MO";
+static NSString *const kDayOfWeekTuesday = @"TU";
+static NSString *const kDayOfWeekWednesday = @"WE";
+static NSString *const kDayOfWeekThursday = @"TH";
+static NSString *const kDayOfWeekFriday = @"FR";
+static NSString *const kDayOfWeekSaturday = @"SA";
 
 @interface PUCalendarEvent ()
 
@@ -63,7 +67,35 @@
     
     if (copy) {
         
+        //private properties
+        [copy setDateFormatterICS:[self.dateFormatterICS copyWithZone:zone]];
+        [copy setDateFormatterHumanReadable:[self.dateFormatterHumanReadable copyWithZone:zone]];
+        [copy setEventExceptionDates:[self.eventExceptionDates copyWithZone:zone]];
+        [copy setCalendar:[self.calendar copyWithZone:zone]];
+        [copy setRepeatRuleString:[self.repeatRuleString copyWithZone:zone]];
         
+        [copy setExceptionRules:[self.exceptionRules copyWithZone:zone]];
+        [copy setRecurrenceRules:[self.recurrenceRules copyWithZone:zone]];
+
+        //Public properties
+        [copy setEventIsAllDay:self.eventIsAllDay];
+
+        [copy setEventStartDate:[self.eventStartDate copyWithZone:zone]];
+        [copy setEventEndDate:[self.eventEndDate copyWithZone:zone]];
+
+        [copy setEventCreatedDate:[self.eventCreatedDate copyWithZone:zone]];
+        [copy setEventLastModifiedDate:[self.eventLastModifiedDate copyWithZone:zone]];
+        
+        [copy setEventUniqueId:[self.eventUniqueId copyWithZone:zone]];
+
+        [copy setEventRecurrenceId:[self.eventRecurrenceId copyWithZone:zone]];
+        [copy setEventSummary:[self.eventSummary copyWithZone:zone]];
+        [copy setEventDescription:[self.eventDescription copyWithZone:zone]];
+        [copy setEventLocation:[self.eventLocation copyWithZone:zone]];
+        [copy setEventStatus:[self.eventStatus copyWithZone:zone]];
+
+        [copy setEventAttendees:[self.eventAttendees copyWithZone:zone]];
+
     }
     
     return copy;
@@ -83,7 +115,7 @@
          exceptionDates:(NSArray *)exceptionDates
           exceptionRule:(NSString *)exceptionRule
              timeZoneId:(NSString *)timeZoneId
-              attendees:(NSArray<MXLCalendarAttendee *> *)attendees {
+              attendees:(NSArray<PUEventAttendee *> *)attendees {
 
     self = [super init];
 
@@ -101,12 +133,12 @@
         self.dateFormatterHumanReadable.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
 
         // Format the start Date
-        NSDateFormatter *startDateFormatter = [NSDateFormatter dateFormatterForICSDateString:startString];
+        NSDateFormatter *startDateFormatter = [NSDateFormatter dateFormatterForICSDateString:&startString];
         startDateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
         self.eventStartDate = [startDateFormatter dateFromString:startString];
 
         //Format the end Date
-        NSDateFormatter *endDateFormatter = [NSDateFormatter dateFormatterForICSDateString:endString];
+        NSDateFormatter *endDateFormatter = [NSDateFormatter dateFormatterForICSDateString:&endString];
         endDateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
         self.eventEndDate = [endDateFormatter dateFromString:endString];
 
@@ -114,12 +146,12 @@
         self.eventIsAllDay = !(startDateFormatter.containsTime && endDateFormatter.containsTime);
         
         //Format the created Date
-        NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:createdString];
+        NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:&createdString];
         dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
         self.eventCreatedDate = [dateFormatter dateFromString:createdString];
         
         //Format the last modified Date
-        dateFormatter = [NSDateFormatter dateFormatterForICSDateString:lastModifiedString];
+        dateFormatter = [NSDateFormatter dateFormatterForICSDateString:&lastModifiedString];
         dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:timeZoneId]) ?: [NSTimeZone localTimeZone];
         self.eventLastModifiedDate = [dateFormatter dateFromString:lastModifiedString];
 
@@ -140,6 +172,13 @@
     }
     
     return self;
+}
+
+- (NSDate *)dateFromString:(NSString *)dateString {
+    
+    NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:&dateString];
+
+    return [dateFormatter dateFromString:dateString];
 }
 
 - (BOOL)checkDay:(NSInteger)day month:(NSInteger)month year:(NSInteger)year {
@@ -197,7 +236,7 @@
     
     NSInteger dayOfYear = [self.calendar ordinalityOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitYear forDate:date];
 
-    NSString *dayString = [self gregorianCalendarLocalizedDayOfWeekStringFromInteger:components.weekday];
+    NSString *dayString = [self gregorianCalendarICSDayOfWeekFromInteger:components.weekday];
     
     NSString *weekNumberString = [NSString stringWithFormat:@"%li", (long)components.weekOfYear];
     NSString *monthString = [NSString stringWithFormat:@"%li", (long)components.month];
@@ -235,7 +274,7 @@
     self.recurrenceRules.repeatRuleInterval = self.recurrenceRules.repeatRuleInterval ? : @"1";
 
     // If it's set to repeat weekly...
-    if ([self.recurrenceRules.repeatRuleFrequency isEqualToString:WEEKLY_FREQUENCY]) {
+    if (self.recurrenceRules.repeatRuleFrequency == PUFrequencyWeekly) {
 
         // Is there a limit on the number of repetitions
         // (e.g., event repeats for the 3 occurrences after it first occurred)
@@ -300,7 +339,7 @@
             }
         }
         // Same rules apply to above tests
-    } else if ([self.recurrenceRules.repeatRuleFrequency isEqualToString:MONTHLY_FREQUENCY]) {
+    } else if (self.recurrenceRules.repeatRuleFrequency == PUFrequencyMonthly) {
         
         if (self.recurrenceRules.repeatRuleCount) {
 
@@ -357,7 +396,7 @@
                 return ![self exceptionOnDate:date];
             }
         }
-    } else if ([self.recurrenceRules.repeatRuleFrequency isEqualToString:YEARLY_FREQUENCY]) {
+    } else if (self.recurrenceRules.repeatRuleFrequency == PUFrequencyYearly) {
         
         if (self.recurrenceRules.repeatRuleCount) {
             
@@ -435,7 +474,7 @@
 
     NSInteger dayOfYear = [self.calendar ordinalityOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitYear forDate:date];
 
-    NSString *dayString = [self gregorianCalendarLocalizedDayOfWeekStringFromInteger:checkDateComponents.weekday];
+    NSString *dayString = [self gregorianCalendarICSDayOfWeekFromInteger:checkDateComponents.weekday];
     NSString *weekNumberString  = [NSString stringWithFormat:@"%li", (long)checkDateComponents.weekOfYear];
     NSString *monthString = [NSString stringWithFormat:@"%li", (long)checkDateComponents.month];
 
@@ -469,7 +508,7 @@
     self.exceptionRules.exceptionRuleInterval = self.exceptionRules.exceptionRuleInterval ? : @"1";
 
     // If it's set to repeat every week...
-    if ([self.exceptionRules.exceptionRuleFrequency isEqualToString:WEEKLY_FREQUENCY]) {
+    if (self.exceptionRules.exceptionRuleFrequency == PUFrequencyWeekly) {
 
         // Is there a limit on the number of repetitions
         // (e.g., event repeats for the 3 occurrences after it first occurred)
@@ -511,7 +550,7 @@
 
             return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
         }
-    } else if ([self.exceptionRules.exceptionRuleFrequency isEqualToString:MONTHLY_FREQUENCY]) {
+    } else if (self.exceptionRules.exceptionRuleFrequency == PUFrequencyMonthly) {
         
         if (self.exceptionRules.exceptionRuleCount) {
 
@@ -548,7 +587,7 @@
 
             return !(difference % self.exceptionRules.exceptionRuleInterval.integerValue);
         }
-    } else if ([self.exceptionRules.exceptionRuleFrequency isEqualToString:YEARLY_FREQUENCY]) {
+    } else if (self.exceptionRules.exceptionRuleFrequency == PUFrequencyYearly) {
         
         if (self.exceptionRules.exceptionRuleCount) {
             
@@ -606,11 +645,7 @@
     endComponents.month = selectedDayComponents.month;
     endComponents.year = selectedDayComponents.year;
 
-    EKEvent *event = [EKEvent eventWithEventStore:eventStore];
-    event.title = self.eventSummary;
-    event.notes = self.eventDescription;
-    event.location = self.eventLocation;
-    event.allDay = self.eventIsAllDay;
+    EKEvent *event = [self convertToEKEventWithEventStore:eventStore];
     
     event.startDate = [self.calendar dateFromComponents:startComponents];
     event.endDate = [self.calendar dateFromComponents:endComponents];
@@ -621,29 +656,60 @@
 - (EKEvent *)convertToEKEventWithEventStore:(EKEventStore *)eventStore {
     
     EKEvent *event = [EKEvent eventWithEventStore:eventStore];
-    [event setTitle:self.eventSummary];
-    [event setNotes:self.eventDescription];
-    [event setLocation:self.eventLocation];
-    [event setAllDay:self.eventIsAllDay];
-    
-    [event setStartDate:self.eventStartDate];
-    [event setEndDate:self.eventEndDate];
+    event.title = self.eventSummary;
+    event.notes = self.eventDescription;
+    event.location = self.eventLocation;
+    event.allDay = self.eventIsAllDay;
+
+    event.startDate = self.eventStartDate;
+    event.endDate = self.eventEndDate;
     
     return event;
 }
 
-- (NSString *)gregorianCalendarLocalizedDayOfWeekStringFromInteger:(NSInteger)day {
+-(NSString *)gregorianCalendarICSDayOfWeekFromInteger:(NSInteger)day {
     
-    NSDateComponents *weekDayComponents = [self.calendar components:NSCalendarUnitWeekday fromDate:NSDate.date];
-    
-    weekDayComponents.weekday = day;
-    
-    NSDate *localizedDate = [NSCalendar.currentCalendar dateFromComponents:weekDayComponents];
-    
-    NSDateFormatter *localizedWeekDayFormatter = [NSDateFormatter new];
-    localizedWeekDayFormatter.dateFormat = @"EE";
-    
-    return [localizedWeekDayFormatter stringFromDate:localizedDate];
+    switch (day) {
+        case 1:
+            return kDayOfWeekSunday;
+            break;
+        case 2:
+            return kDayOfWeekMonday;
+            break;
+        case 3:
+            return kDayOfWeekTuesday;
+            break;
+        case 4:
+            return kDayOfWeekWednesday;
+            break;
+        case 5:
+            return kDayOfWeekThursday;
+            break;
+        case 6:
+            return kDayOfWeekFriday;
+            break;
+        case 7:
+            return kDayOfWeekSaturday;
+            break;
+        default:
+            return @"";
+            break;
+    }
 }
+
+//- (NSString *)gregorianCalendarLocalizedDayOfWeekStringFromInteger:(NSInteger)day {
+//
+//    NSDateComponents *weekDayComponents = [self.calendar components:NSCalendarUnitWeekday fromDate:NSDate.date];
+//
+//    weekDayComponents.weekday = day;
+//
+//    NSDate *localizedDate = [NSCalendar.currentCalendar dateFromComponents:weekDayComponents];
+//
+//    NSDateFormatter *localizedWeekDayFormatter = [NSDateFormatter new];
+//    localizedWeekDayFormatter.dateFormat = @"EE";
+//
+//    NSString *weekDayString = [localizedWeekDayFormatter stringFromDate:localizedDate];
+//    return weekDayString;
+//}
 
 @end

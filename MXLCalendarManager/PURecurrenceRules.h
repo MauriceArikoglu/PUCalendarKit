@@ -6,10 +6,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "PUCalendarEnumerations.h"
 
 @interface PURecurrenceRules : NSObject <NSCopying>
 
-@property (nonatomic, copy) NSString *repeatRuleFrequency;
+@property (nonatomic, assign) PUFrequency repeatRuleFrequency;
 @property (nonatomic, copy) NSString *repeatRuleCount;
 
 @property (nonatomic, copy) NSString *repeatRuleInterval;

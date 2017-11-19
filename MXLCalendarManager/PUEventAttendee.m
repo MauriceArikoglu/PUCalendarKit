@@ -1,18 +1,18 @@
 //
-//  MXLCalendarAttendee.m
-//  ICSExporter
+//  PUEventAttendee.m
 //
-//  Created by Rahul Somasunderam on 6/20/14.
-//  Copyright (c) 2014 MobileX Labs. All rights reserved.
+//  Created by Maurice Arikoglu, based on MXLCalendarManager Framework by Kiran Panesar created on 09/04/2013.
+//  Copyright (c) 2017 Maurice Arikoglu. All rights reserved.
 //
 
-#import "MXLCalendarAttendee.h"
+#import "PUEventAttendee.h"
+#import "NSString+PUCalendarICSEnumerations.h"
 
-@implementation MXLCalendarAttendee
+@implementation PUEventAttendee
 
 - (id)copyWithZone:(NSZone *)zone {
     
-    MXLCalendarAttendee *copy = [[MXLCalendarAttendee allocWithZone:zone] init];
+    PUEventAttendee *copy = [[PUEventAttendee allocWithZone:zone] init];
     
     if (copy) {
         
@@ -25,7 +25,7 @@
     return copy;
 }
 
-- (id)initWithRole:(PUAttendeeRole)role commonName:(NSString *)commonName andUri:(NSString *)uri {
+- (id)initWithRole:(PURole)role commonName:(NSString *)commonName andUri:(NSString *)uri {
     
     self = [super init];
     
@@ -43,7 +43,7 @@
     
     if (attendeeString) {
         
-        MXLCalendarAttendee *attendee = [[MXLCalendarAttendee alloc] init];
+        PUEventAttendee *attendee = [[PUEventAttendee alloc] init];
         
         if (attendee) {
             
@@ -72,10 +72,8 @@
             [attributesScanner scanUpToString:@";" intoString:&placeholder];
             
             NSString *role = [placeholder stringByReplacingOccurrencesOfString:@"ROLE=" withString:@""];
-            NSValue *roleValue = [NSValue valueWithBytes:&role objCType:@encode(Role)];
-            
             //Assign the Role
-            attendee.role = (PUAttendeeRole)roleValue;
+            attendee.role = [role roleForICSRoleString];
             
             attributesScanner = [NSScanner scannerWithString:attributes];
             [attributesScanner scanUpToString:@"CN=" intoString:nil];

@@ -77,14 +77,13 @@
 - (void)addEvent:(PUCalendarEvent *)event onDateWithDay:(NSInteger)day month:(NSInteger)month andYear:(NSInteger)year {
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"dd-MM-yyyy"];
+    [dateFormatter setDateFormat:@"yyyyddMM"];
 
     NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth| NSCalendarUnitYear fromDate:[NSDate date]];
     
-    [components setDay:day];
-    [components setMonth:month];
-    [components setYear:year];
-    
+    components.day = day;
+    components.month = month;
+    components.year = year;
     
     [self addEvent:event onDateRepresentedAsString:[dateFormatter stringFromDate:[[NSCalendar currentCalendar] dateFromComponents:components]]];
 }
@@ -124,33 +123,27 @@
 - (void)addEvent:(PUCalendarEvent *)event onDate:(NSDate *)date {
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"dd-MM-yyyy"];
+    [dateFormatter setDateFormat:@"yyyyddMM"];
     
     [self addEvent:event onDateRepresentedAsString:[dateFormatter stringFromDate:date]];
 }
 
 - (void)loadedAllEventsForDate:(NSDate *)date {
     
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"dd-MM-yyyy"];
-
     NSMutableDictionary *mutableLoadedEvents = [NSMutableDictionary dictionaryWithDictionary:self.loadedEvents.mutableCopy];
-    [mutableLoadedEvents setObject:[NSNumber numberWithBool:YES] forKey:[dateFormatter stringFromDate:date]];
+    [mutableLoadedEvents setObject:[NSNumber numberWithBool:YES] forKey:date];
     self.loadedEvents = mutableLoadedEvents.copy;
 }
 
 - (BOOL)hasLoadedAllEventsForDate:(NSDate *)date {
     
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"dd-MM-yyyy"];
-
-    return [self.loadedEvents objectForKey:[dateFormatter stringFromDate:date]];
+    return [self.loadedEvents objectForKey:date];
 }
 
 - (NSArray *)eventsForDate:(NSDate *)date {
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"dd-MM-yyyy"];
+    [dateFormatter setDateFormat:@"yyyyddMM"];
     
     NSMutableArray *mutableEventsForDay = [self.daysOfEvents objectForKey:[dateFormatter stringFromDate:date]];
     
@@ -160,10 +153,11 @@
         PUCalendarEvent *firstEvent = obj1;
         PUCalendarEvent *secondEvent = obj2;
 
-//        NSDateComponents *firstComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:firstEvent.eventStartDate];
-//        NSDateComponents *secondComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:secondEvent.eventStartDate];
-
-        return [firstEvent.eventStartDate compare:secondEvent.eventStartDate];
+        //We compare time only because initial start dates might be different because of recurrence
+        NSDateComponents *firstComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:firstEvent.eventStartDate];
+        NSDateComponents *secondComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:secondEvent.eventStartDate];
+        
+        return [[[NSCalendar currentCalendar] dateFromComponents:firstComponents] compare:[[NSCalendar currentCalendar] dateFromComponents:secondComponents]];
     }]];
     
     //Set the sorted array and return a copy

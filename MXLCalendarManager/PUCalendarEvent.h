@@ -23,21 +23,10 @@
 //  THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import "MXLCalendarAttendee.h"
+#import "PUEventAttendee.h"
 
 @class EKEvent;
 @class EKEventStore;
-
-//typedef NS_ENUM(NSInteger, PUCalendarEventRuleType) {
-//
-//    PUCalendarEventRuleTypeRepetition,
-//    PUCalendarEventRuleTypeException
-//};
-
-//typedef enum {
-//    MXLCalendarEventRuleTypeRepetition,
-//    MXLCalendarEventRuleTypeException
-//}MXLCalendarEventRuleType;
 
 @interface PUCalendarEvent : NSObject <NSCopying>
 
@@ -55,7 +44,7 @@
 @property (nonatomic, copy) NSString *eventLocation;
 @property (nonatomic, copy) NSString *eventStatus;
 
-@property (nonatomic, retain) NSArray<MXLCalendarAttendee *> *eventAttendees;
+@property (nonatomic, retain) NSArray<PUEventAttendee *> *eventAttendees;
 
 - (id)initWithStartDate:(NSString *)startString
                 endDate:(NSString *)endString
@@ -71,12 +60,9 @@
          exceptionDates:(NSArray *)exceptionDates
           exceptionRule:(NSString *)exceptionRule
              timeZoneId:(NSString *)timeZoneId
-              attendees:(NSArray<MXLCalendarAttendee *> *)attendees;
+              attendees:(NSArray<PUEventAttendee *> *)attendees;
 
-//- (NSDate *)dateFromString:(NSString *)dateString;
-
-//-(void)parseRules:(NSString *)rule
-//          forType:(MXLCalendarEventRuleType)type;
+- (NSDate *)dateFromString:(NSString *)dateString;
 
 - (BOOL)checkDay:(NSInteger)day month:(NSInteger)month year:(NSInteger)year;
 
@@ -84,7 +70,7 @@
 
 - (BOOL)exceptionOnDate:(NSDate *)date;
 
-- (EKEvent *)convertToEKEventOnDate:(NSDate *)date store:(EKEventStore *)eventStore;
+- (EKEvent *)convertToEKEventOnDate:(NSDate *)date withEventStore:(EKEventStore *)eventStore;
 
 @end
 @compatibility_alias MXLCalendarEvent PUCalendarEvent;

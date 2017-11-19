@@ -15,14 +15,15 @@
     
     if (copy) {
         
-        [copy setExceptionRuleFrequency:[self.exceptionRuleFrequency copyWithZone:zone]];
+        [copy setExceptionRuleFrequency:self.exceptionRuleFrequency];
+        
         [copy setExceptionRuleCount:[self.exceptionRuleCount copyWithZone:zone]];
         [copy setExceptionRuleInterval:[self.exceptionRuleInterval copyWithZone:zone]];
         [copy setExceptionRuleWeekStart:[self.exceptionRuleWeekStart copyWithZone:zone]];
 
         [copy setExceptionRuleUntilDate:[self.exceptionRuleUntilDate copyWithZone:zone]];
 
-        [copy setExceptionRulesBySecond:[self.exceptionRuleFrequency copyWithZone:zone]];
+        [copy setExceptionRulesBySecond:[self.exceptionRulesBySecond copyWithZone:zone]];
         [copy setExceptionRulesByMinute:[self.exceptionRulesByMinute copyWithZone:zone]];
         [copy setExceptionRulesByHour:[self.exceptionRulesByHour copyWithZone:zone]];
         [copy setExceptionRulesByDay:[self.exceptionRulesByDay copyWithZone:zone]];

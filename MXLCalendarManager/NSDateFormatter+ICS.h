@@ -13,6 +13,6 @@
 @property (nonatomic, assign) BOOL containsTime;
 @property (nonatomic, assign) BOOL containsZone;
 
-+ (instancetype)dateFormatterForICSDateString:(NSString *)dateString;
++ (instancetype)dateFormatterForICSDateString:(NSString **)dateString;
 
 @end

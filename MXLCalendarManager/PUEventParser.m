@@ -9,7 +9,9 @@
 #import "PUCalendarEvent.h"
 #import "PUExceptionRules.h"
 #import "PURecurrenceRules.h"
+
 #import "NSDateFormatter+ICS.h"
+#import "NSString+PUCalendarICSEnumerations.h"
 
 @implementation PUEventParser
 
@@ -25,7 +27,7 @@
         
         if ([rule rangeOfString:@"FREQ"].location != NSNotFound) {
             // If the rule is for the FREQuency
-            recurrenceRules.repeatRuleFrequency = [PUEventParser parseFrequencyRule:rule];
+            recurrenceRules.repeatRuleFrequency = [[PUEventParser parseFrequencyRule:rule] frequencyForICSFrequencyString];
             
         } else if ([rule rangeOfString:@"COUNT"].location != NSNotFound) {
             // If the rule is for the COUNT
@@ -34,7 +36,7 @@
         } else if ([rule rangeOfString:@"UNTIL"].location != NSNotFound) {
             // If the rule is for the UNTIL date
             NSString *parsedRule = [PUEventParser parseUntilRule:rule];
-            NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:parsedRule];
+            NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:&parsedRule];
             dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:calendarContext]) ?: [NSTimeZone localTimeZone];
 
             recurrenceRules.repeatRuleUntilDate = [dateFormatter dateFromString:parsedRule];
@@ -84,7 +86,7 @@
         
         if ([rule rangeOfString:@"FREQ"].location != NSNotFound) {
             // If the rule is for the FREQuency
-            exceptionRules.exceptionRuleFrequency = [PUEventParser parseFrequencyRule:rule];
+            exceptionRules.exceptionRuleFrequency = [[PUEventParser parseFrequencyRule:rule] frequencyForICSFrequencyString];
             
         } else if ([rule rangeOfString:@"COUNT"].location != NSNotFound) {
             // If the rule is for the COUNT
@@ -94,7 +96,7 @@
             // If the rule is for the UNTIL date
             NSString *parsedRule = [PUEventParser parseUntilRule:rule];
             
-            NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:parsedRule];
+            NSDateFormatter *dateFormatter = [NSDateFormatter dateFormatterForICSDateString:&parsedRule];
             dateFormatter.timeZone = ([NSTimeZone timeZoneWithName:calendarContext]) ?: [NSTimeZone localTimeZone];
             
             exceptionRules.exceptionRuleUntilDate = [dateFormatter dateFromString:parsedRule];
@@ -269,7 +271,7 @@
     NSString *eventUniqueIdString = [self extractUniqueIdInformationFromICSEventString:eventString];
     
     // Extract the attendees
-    NSArray <MXLCalendarAttendee *> *attendees = [self extractAttendeesInformationFromICSEventString:eventString];
+    NSArray <PUEventAttendee *> *attendees = [self extractAttendeesInformationFromICSEventString:eventString];
     
     // Extract the recurrence Id
     NSString *recurrenceIdString = [self extractRecurrenceInformationFromICSEventString:eventString withTimeZoneString:timezoneIdString];
@@ -500,9 +502,9 @@
     return [[recurrenceString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"RECURRENCE-ID;TZID=%@:", timeZoneString] withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
-+ (NSArray <MXLCalendarAttendee *>*)extractAttendeesInformationFromICSEventString:(NSString *)extractString {
++ (NSArray <PUEventAttendee *>*)extractAttendeesInformationFromICSEventString:(NSString *)extractString {
     
-    NSMutableArray <MXLCalendarAttendee *> *attendees = [NSMutableArray new];
+    NSMutableArray <PUEventAttendee *> *attendees = [NSMutableArray new];
     
     NSScanner *attendeesScanner = [NSScanner scannerWithString:extractString];
     
@@ -523,7 +525,7 @@
                 attendeeString = [[attendeeString stringByReplacingOccurrencesOfString:@"ATTENDEE;" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
                 
                 //Create a new attendee instance from the extracted string
-                MXLCalendarAttendee *attendee = [MXLCalendarAttendee attendeeForString:attendeeString];
+                PUEventAttendee *attendee = [PUEventAttendee attendeeForString:attendeeString];
                 
                 if (attendee) {
                     

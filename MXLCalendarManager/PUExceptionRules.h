@@ -6,10 +6,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "PUCalendarEnumerations.h"
 
 @interface PUExceptionRules : NSObject <NSCopying>
 
-@property (nonatomic, copy) NSString *exceptionRuleFrequency;
+@property (nonatomic, assign) PUFrequency exceptionRuleFrequency;
 @property (nonatomic, copy) NSString *exceptionRuleCount;
 
 @property (nonatomic, copy) NSString *exceptionRuleInterval;
