@@ -10,6 +10,6 @@ Installation
 The recommended installation is via CocoaPods.
 
 ```
-pod 'MXLCalendarManager'
+pod 'PUCalendarKit'
 ```
 
