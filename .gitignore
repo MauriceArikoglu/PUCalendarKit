@@ -1,13 +1,32 @@
+tignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
-# OS or Editor folders
-.DS_Store
-Thumbs.db
-.cache
-.project
-.settings
-.tmproj
-*.esproj
-nbproject
-*.sublime-project
-*.sublime-workspace
-.idea
+## Build generated
+build/
+DerivedData/
+
+## Various settings
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+
+## Other
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+## Obj-C/Swift specific
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.DS_Store
+
+##Pods
+
+Pods/
