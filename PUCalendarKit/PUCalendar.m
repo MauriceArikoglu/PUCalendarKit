@@ -137,7 +137,7 @@
 
 - (BOOL)hasLoadedAllEventsForDate:(NSDate *)date {
     
-    return ([self.loadedEvents objectForKey:date] != nil);
+    return [self.loadedEvents objectForKey:date];
 }
 
 - (NSArray *)eventsForDate:(NSDate *)date {
