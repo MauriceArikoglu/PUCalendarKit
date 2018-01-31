@@ -333,9 +333,6 @@
 
     NSDate *lastModifiedDate = [dateFormatter dateFromString:lastModifiedDateTimeString];
 
-    PURecurrenceRules *recurrenceRules = [PUEventParser parseRecurrenceRulesWithICSEventRecurrenceRuleString:recurrenceRuleString inCalendarContext:timeZoneIdString];
-    PUExceptionRules *exceptionRules = [PUEventParser parseExceptionRulesWithICSEventExceptionRuleString:exceptionRuleString inCalendarContext:timeZoneIdString];
-    
     //The Event is Allday when either startDate or endDate dont have a time
     PUCalendarEvent *parsedEvent = [[PUCalendarEvent alloc] initWithStartDate:startDate
                                                                  eventEndDate:endDate
@@ -348,8 +345,8 @@
                                                              eventDescription:descriptionString
                                                                 eventLocation:locationString
                                                                   eventStatus:[statusString statusForICSStatusString]
-                                                              recurrenceRules:recurrenceRules
-                                                               exceptionRules:exceptionRules
+                                                         recurrenceRuleString:recurrenceRuleString
+                                                          exceptionRuleString:exceptionRuleString
                                                                exceptionDates:exceptionDates
                                                                      timeZone:timeZoneIdString
                                                                eventAttendees:attendees];
