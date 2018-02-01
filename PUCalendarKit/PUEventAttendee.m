@@ -84,10 +84,10 @@
             NSString *name = [placeholder stringByReplacingOccurrencesOfString:@"CN=" withString:@""];
             attendee.commonName = name;
 
-            [attributesScanner scanUpToString:@"mailto:" intoString:nil];
-            [attributesScanner scanUpToString:@"" intoString:&placeholder];
-            NSString *email = [placeholder stringByReplacingOccurrencesOfString:@"mailto:" withString:@""];
-            attendee.email = email;
+            NSScanner *emailScanner = [NSScanner scannerWithString:attendeeString];
+            [emailScanner scanUpToString:@"mailto:" intoString:nil];
+            [emailScanner scanUpToString:@"" intoString:&placeholder];
+            attendee.email = [placeholder stringByReplacingOccurrencesOfString:@"mailto:" withString:@""];
         }
         
         return attendee;
