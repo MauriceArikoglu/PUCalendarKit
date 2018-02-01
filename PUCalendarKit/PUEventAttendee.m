@@ -86,7 +86,8 @@
 
             [attributesScanner scanUpToString:@"mailto:" intoString:nil];
             [attributesScanner scanUpToString:@"" intoString:&placeholder];
-            attendee.email = placeholder;
+            NSString *email = [placeholder stringByReplacingOccurrencesOfString:@"mailto:" withString:@""];
+            attendee.email = email;
         }
         
         return attendee;
