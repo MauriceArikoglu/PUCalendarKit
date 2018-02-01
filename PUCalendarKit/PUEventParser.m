@@ -274,7 +274,7 @@
     NSArray <PUEventAttendee *> *attendees = [self extractAttendeesInformationFromICSEventString:eventString];
 
     // Extract the organizer
-    NSString *organizer = [self extractOrganizerInformationFromICSEventString:eventString];
+    NSString *organizerEmail = [self extractOrganizerInformationFromICSEventString:eventString];
 
     // Extract the recurrence Id
     NSString *recurrenceIdString = [self extractRecurrenceInformationFromICSEventString:eventString withTimeZoneString:timeZoneIdString];
@@ -353,7 +353,7 @@
                                                                exceptionDates:exceptionDates
                                                                      timeZone:timeZoneIdString
                                                                eventAttendees:attendees
-                                                                    organizer:organizer];
+                                                               organizerEmail:organizerEmail];
     
     return parsedEvent;
 }
@@ -600,15 +600,15 @@
 
 + (NSString *)extractOrganizerInformationFromICSEventString:(NSString *)extractString {
 
-    NSString *organizerString;
+    NSString *organizerEmailString;
 
     NSScanner *organizerScanner = [NSScanner scannerWithString:extractString];
 
     [organizerScanner scanUpToString:@"ORGANIZER;" intoString:nil];
     [organizerScanner scanUpToString:@"mailto:" intoString:nil];
-    [organizerScanner scanUpToString:@"\n" intoString:&organizerString];
+    [organizerScanner scanUpToString:@"\n" intoString:&organizerEmailString];
 
-    return [[organizerString stringByReplacingOccurrencesOfString:@"mailto:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
+    return [[organizerEmailString stringByReplacingOccurrencesOfString:@"mailto:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
 #pragma mark - Unique Id

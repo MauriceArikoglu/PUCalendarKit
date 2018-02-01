@@ -53,7 +53,7 @@
 @property (nonatomic, assign) PUStatus eventStatus;
 
 @property (nonatomic, retain) NSArray<PUEventAttendee *> *eventAttendees;
-@property (nonatomic, copy) NSString *organizer;
+@property (nonatomic, copy) NSString *organizerEmail;
 
 - (id)initWithStartDate:(NSDate *)startDate
            eventEndDate:(NSDate *)endDate
@@ -71,7 +71,7 @@
          exceptionDates:(NSArray *)exceptionDates
                timeZone:(NSString *)timeZoneAbbreviationOrId
          eventAttendees:(NSArray<PUEventAttendee *> *)attendees
-              organizer:(NSString *)organizer;
+         organizerEmail:(NSString *)organizerEmail;
 
 - (NSDate *)dateFromString:(NSString *)dateString;
 

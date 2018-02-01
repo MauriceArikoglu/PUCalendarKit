@@ -92,7 +92,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         [copy setEventStatus:self.eventStatus];
 
         [copy setEventAttendees:[self.eventAttendees copyWithZone:zone]];
-        [copy setOrganizer:[self.organizer copyWithZone:zone]];
+        [copy setOrganizerEmail:[self.organizerEmail copyWithZone:zone]];
     }
     
     return copy;
@@ -114,7 +114,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
          exceptionDates:(NSArray *)exceptionDates
                timeZone:(NSString *)timeZoneAbbreviationOrId
          eventAttendees:(NSArray<PUEventAttendee *> *)attendees
-              organizer:(NSString *)organizer {
+         organizerEmail:(NSString *)organizerEmail {
 
     self = [super init];
 
@@ -155,7 +155,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         self.eventLocation = [location stringByReplacingOccurrencesOfString:@"\\" withString:@""];
         self.eventStatus = status;
         self.eventAttendees = attendees.copy;
-        self.organizer = organizer.copy;
+        self.organizerEmail = organizerEmail.copy;
     }
     
     return self;
