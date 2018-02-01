@@ -272,7 +272,10 @@
     
     // Extract the attendees
     NSArray <PUEventAttendee *> *attendees = [self extractAttendeesInformationFromICSEventString:eventString];
-    
+
+    // Extract the organizer
+    NSString *organizerEmail = [self extractOrganizerInformationFromICSEventString:eventString];
+
     // Extract the recurrence Id
     NSString *recurrenceIdString = [self extractRecurrenceInformationFromICSEventString:eventString withTimeZoneString:timeZoneIdString];
     
@@ -349,7 +352,8 @@
                                                           exceptionRuleString:exceptionRuleString
                                                                exceptionDates:exceptionDates
                                                                      timeZone:timeZoneIdString
-                                                               eventAttendees:attendees];
+                                                               eventAttendees:attendees
+                                                               organizerEmail:organizerEmail];
     
     return parsedEvent;
 }
@@ -590,6 +594,21 @@
     
     //return a immutable copy
     return attendees.copy;
+}
+
+#pragma mark - Organizer
+
++ (NSString *)extractOrganizerInformationFromICSEventString:(NSString *)extractString {
+
+    NSString *organizerEmailString;
+
+    NSScanner *organizerScanner = [NSScanner scannerWithString:extractString];
+
+    [organizerScanner scanUpToString:@"ORGANIZER;" intoString:nil];
+    [organizerScanner scanUpToString:@"mailto:" intoString:nil];
+    [organizerScanner scanUpToString:@"\n" intoString:&organizerEmailString];
+
+    return [[organizerEmailString stringByReplacingOccurrencesOfString:@"mailto:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
 #pragma mark - Unique Id
