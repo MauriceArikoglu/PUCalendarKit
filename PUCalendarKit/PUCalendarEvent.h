@@ -45,9 +45,15 @@
 @property (nonatomic, copy) NSString *eventDescription;
 @property (nonatomic, copy) NSString *eventLocation;
 
+@property (nonatomic, copy) PURecurrenceRules *recurrenceRules;
+@property (nonatomic, copy) NSString *recurrenceRuleString;
+@property (nonatomic, copy) PUExceptionRules *exceptionRules;
+@property (nonatomic, copy) NSString *exceptionRuleString;
+
 @property (nonatomic, assign) PUStatus eventStatus;
 
 @property (nonatomic, retain) NSArray<PUEventAttendee *> *eventAttendees;
+@property (nonatomic, copy) NSString *organizerEmail;
 
 - (id)initWithStartDate:(NSDate *)startDate
            eventEndDate:(NSDate *)endDate
@@ -60,11 +66,12 @@
        eventDescription:(NSString *)description
           eventLocation:(NSString *)location
             eventStatus:(PUStatus)status
-        recurrenceRules:(PURecurrenceRules *)recurrenceRules
-         exceptionRules:(PUExceptionRules *)exceptionRules
+   recurrenceRuleString:(NSString *)recurrenceRuleString
+    exceptionRuleString:(NSString *)exceptionRuleString
          exceptionDates:(NSArray *)exceptionDates
                timeZone:(NSString *)timeZoneAbbreviationOrId
-         eventAttendees:(NSArray<PUEventAttendee *> *)attendees;
+         eventAttendees:(NSArray<PUEventAttendee *> *)attendees
+         organizerEmail:(NSString *)organizerEmail;
 
 - (NSDate *)dateFromString:(NSString *)dateString;
 

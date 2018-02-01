@@ -52,11 +52,6 @@ static NSString *const kDayOfWeekSaturday = @"SA";
 
 @property (nonatomic, retain) NSCalendar *calendar;
 
-//@property (nonatomic, copy) NSString *repeatRuleString;
-
-@property (nonatomic, copy) PUExceptionRules *exceptionRules;
-@property (nonatomic, copy) PURecurrenceRules *recurrenceRules;
-
 @end
 
 @implementation MXLCalendarEvent
@@ -72,10 +67,11 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         [copy setDateFormatterHumanReadable:[self.dateFormatterHumanReadable copyWithZone:zone]];
         [copy setEventExceptionDates:[self.eventExceptionDates copyWithZone:zone]];
         [copy setCalendar:[self.calendar copyWithZone:zone]];
-//        [copy setRepeatRuleString:[self.repeatRuleString copyWithZone:zone]];
-        
-        [copy setExceptionRules:[self.exceptionRules copyWithZone:zone]];
+
         [copy setRecurrenceRules:[self.recurrenceRules copyWithZone:zone]];
+        [copy setRecurrenceRuleString:[self.recurrenceRuleString copyWithZone:zone]];
+        [copy setExceptionRules:[self.exceptionRules copyWithZone:zone]];
+        [copy setExceptionRuleString:[self.exceptionRuleString copyWithZone:zone]];
 
         //Public properties
         [copy setEventIsAllDay:self.eventIsAllDay];
@@ -96,7 +92,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         [copy setEventStatus:self.eventStatus];
 
         [copy setEventAttendees:[self.eventAttendees copyWithZone:zone]];
-
+        [copy setOrganizerEmail:[self.organizerEmail copyWithZone:zone]];
     }
     
     return copy;
@@ -113,11 +109,12 @@ static NSString *const kDayOfWeekSaturday = @"SA";
        eventDescription:(NSString *)description
           eventLocation:(NSString *)location
             eventStatus:(PUStatus)status
-        recurrenceRules:(PURecurrenceRules *)recurrenceRules
-         exceptionRules:(PUExceptionRules *)exceptionRules
+   recurrenceRuleString:(NSString *)recurrenceRuleString
+    exceptionRuleString:(NSString *)exceptionRuleString
          exceptionDates:(NSArray *)exceptionDates
                timeZone:(NSString *)timeZoneAbbreviationOrId
-         eventAttendees:(NSArray<PUEventAttendee *> *)attendees {
+         eventAttendees:(NSArray<PUEventAttendee *> *)attendees
+         organizerEmail:(NSString *)organizerEmail {
 
     self = [super init];
 
@@ -143,8 +140,13 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         
         self.eventLastModifiedDate = lastModifiedDate;
         
+        PURecurrenceRules *recurrenceRules = [PUEventParser parseRecurrenceRulesWithICSEventRecurrenceRuleString:recurrenceRuleString inCalendarContext:timeZoneAbbreviationOrId];
+        PUExceptionRules *exceptionRules = [PUEventParser parseExceptionRulesWithICSEventExceptionRuleString:exceptionRuleString inCalendarContext:timeZoneAbbreviationOrId];
+
         self.recurrenceRules = recurrenceRules;
+        self.recurrenceRuleString = recurrenceRuleString;
         self.exceptionRules = exceptionRules;
+        self.exceptionRuleString = exceptionRuleString;
         
         self.eventUniqueId = uniqueId;
         self.eventRecurrenceId  = recurrenceId;
@@ -153,7 +155,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         self.eventLocation = [location stringByReplacingOccurrencesOfString:@"\\" withString:@""];
         self.eventStatus = status;
         self.eventAttendees = attendees.copy;
-
+        self.organizerEmail = organizerEmail.copy;
     }
     
     return self;
