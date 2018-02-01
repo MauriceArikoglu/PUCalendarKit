@@ -18,6 +18,7 @@
         
         [copy setUri:[self.uri copyWithZone:zone]];
         [copy setCommonName:[self.commonName copyWithZone:zone]];
+        [copy setEmail:[self.email copyWithZone:zone]];
         
         [copy setRole:self.role];
     }
@@ -25,7 +26,7 @@
     return copy;
 }
 
-- (id)initWithRole:(PURole)role commonName:(NSString *)commonName andUri:(NSString *)uri {
+- (id)initWithRole:(PURole)role commonName:(NSString *)commonName email:(NSString *)email andUri:(NSString *)uri {
     
     self = [super init];
     
@@ -34,6 +35,7 @@
         self.role = role;
         self.commonName = commonName;
         self.uri = uri;
+        self.email = email;
     }
     
     return self;
@@ -81,6 +83,10 @@
             
             NSString *name = [placeholder stringByReplacingOccurrencesOfString:@"CN=" withString:@""];
             attendee.commonName = name;
+
+            [attributesScanner scanUpToString:@"mailto:" intoString:nil];
+            [attributesScanner scanUpToString:@"" intoString:&placeholder];
+            attendee.email = placeholder;
         }
         
         return attendee;
