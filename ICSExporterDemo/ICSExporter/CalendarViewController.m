@@ -350,7 +350,7 @@
     
     MXLCalendarManager *calendarManager = [[MXLCalendarManager alloc] init];
     
-    [calendarManager scanICSFileAtLocalPath:[[NSBundle mainBundle] pathForResource:@"basic" ofType:@"ics"]
+    [calendarManager scanICSFileAtLocalPath:[[NSBundle mainBundle] pathForResource:@"university" ofType:@"ics"]
                       withCompletionHandler:^(PUCalendar *calendar, NSError *error) {
                           currentCalendar = [[PUCalendar alloc] init];
                           currentCalendar = calendar;

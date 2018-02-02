@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		51873BD71FD2E2A20000E9C5 /* university-formatted.ics in Resources */ = {isa = PBXBuildFile; fileRef = 51873BD61FD2E2A20000E9C5 /* university-formatted.ics */; };
+		51873BD91FD2E2B90000E9C5 /* university.ics in Resources */ = {isa = PBXBuildFile; fileRef = 51873BD81FD2E2B90000E9C5 /* university.ics */; };
 		51F665E01FC205900046FA4F /* NSDateFormatter+ICS.m in Sources */ = {isa = PBXBuildFile; fileRef = 51F665CC1FC205900046FA4F /* NSDateFormatter+ICS.m */; };
 		51F665E11FC205900046FA4F /* NSString+PUCalendarICSEnumerations.m in Sources */ = {isa = PBXBuildFile; fileRef = 51F665CE1FC205900046FA4F /* NSString+PUCalendarICSEnumerations.m */; };
 		51F665E21FC205900046FA4F /* NSTimeZone+ProperAbbreviation.m in Sources */ = {isa = PBXBuildFile; fileRef = 51F665D01FC205900046FA4F /* NSTimeZone+ProperAbbreviation.m */; };
@@ -54,6 +56,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		51873BD61FD2E2A20000E9C5 /* university-formatted.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "university-formatted.ics"; sourceTree = "<group>"; };
+		51873BD81FD2E2B90000E9C5 /* university.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = university.ics; sourceTree = "<group>"; };
 		51F665CB1FC205900046FA4F /* NSDateFormatter+ICS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDateFormatter+ICS.h"; sourceTree = "<group>"; };
 		51F665CC1FC205900046FA4F /* NSDateFormatter+ICS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDateFormatter+ICS.m"; sourceTree = "<group>"; };
 		51F665CD1FC205900046FA4F /* NSString+PUCalendarICSEnumerations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+PUCalendarICSEnumerations.h"; sourceTree = "<group>"; };
@@ -152,6 +156,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		51EBF8632025109000CDD9A5 /* ICS-Examples */ = {
+			isa = PBXGroup;
+			children = (
+				6BF20BE1172056EF006FF53F /* basic.ics */,
+				6B5E9CCA1715B5B600679C47 /* gazette.ics */,
+				6B5E9CC81715B4E400679C47 /* eventlist.ics */,
+				51873BD81FD2E2B90000E9C5 /* university.ics */,
+				51873BD61FD2E2A20000E9C5 /* university-formatted.ics */,
+			);
+			path = "ICS-Examples";
+			sourceTree = "<group>";
+		};
 		51F665CA1FC205900046FA4F /* PUCalendarKit */ = {
 			isa = PBXGroup;
 			children = (
@@ -233,9 +249,7 @@
 				FA9C530D1A402E4200ECFF24 /* MBProgressHUD.m */,
 				51F665CA1FC205900046FA4F /* PUCalendarKit */,
 				6B9B740D171C67C100235765 /* VRGCalendarView */,
-				6BF20BE1172056EF006FF53F /* basic.ics */,
-				6B5E9CCA1715B5B600679C47 /* gazette.ics */,
-				6B5E9CC81715B4E400679C47 /* eventlist.ics */,
+				51EBF8632025109000CDD9A5 /* ICS-Examples */,
 				6B508BE4171489940080AB4D /* ICSExporter-Info.plist */,
 				6B508BE5171489940080AB4D /* InfoPlist.strings */,
 				6B508BE8171489940080AB4D /* main.m */,
@@ -357,6 +371,8 @@
 				6B508BF1171489940080AB4D /* Default@2x.png in Resources */,
 				6B508BF3171489940080AB4D /* Default-568h@2x.png in Resources */,
 				6B5E9CC91715B4E400679C47 /* eventlist.ics in Resources */,
+				51873BD71FD2E2A20000E9C5 /* university-formatted.ics in Resources */,
+				51873BD91FD2E2B90000E9C5 /* university.ics in Resources */,
 				6B5E9CCB1715B5B600679C47 /* gazette.ics in Resources */,
 				6BF20BE2172056EF006FF53F /* basic.ics in Resources */,
 			);
