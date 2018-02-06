@@ -611,7 +611,7 @@
     [organizerScanner scanUpToString:@"mailto:" intoString:nil];
     [organizerScanner scanUpToString:@"\n" intoString:&organizerEmailString];
 
-    return [[organizerEmailString stringByReplacingOccurrencesOfString:@"mailto:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
+    return [[organizerEmailString stringByReplacingOccurrencesOfString:@"mailto:" withString:@"" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [organizerEmailString length])] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
 #pragma mark - Unique Id
