@@ -570,8 +570,11 @@
         
         NSString *attendeeString;
         
-        //Check if there is at least one attendee
-        if ([attendeesScanner scanUpToString:@"ATTENDEE;" intoString:nil]) {
+        // Check if there is at least one attendee
+        // `scanUpToString` doesn't work for any attendee after the first one, since the method returns NO if `ATTENDEE` is the first string at the scanner location
+        // We also check for !attendeesScanner.isAtEnd since `scanUpToString` returns YES if the searchString isn't present in the scanner's source string
+        if ([attendeesScanner scanString:@"ATTENDEE;" intoString:nil] ||
+            ([attendeesScanner scanUpToString:@"ATTENDEE;" intoString:nil] && !attendeesScanner.isAtEnd)) {
             
             scannerStatus = [attendeesScanner scanUpToString:@"\n" intoString:&attendeeString];
             
