@@ -87,7 +87,7 @@
             NSScanner *emailScanner = [NSScanner scannerWithString:attendeeString];
             [emailScanner scanUpToString:@"mailto:" intoString:nil];
             [emailScanner scanUpToString:@"" intoString:&placeholder];
-            attendee.email = [placeholder stringByReplacingOccurrencesOfString:@"mailto:" withString:@""];
+            attendee.email = [placeholder stringByReplacingOccurrencesOfString:@"mailto:" withString:@"" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [placeholder length])];
         }
         
         return attendee;
