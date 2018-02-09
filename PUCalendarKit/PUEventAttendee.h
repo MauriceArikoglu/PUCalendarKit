@@ -13,10 +13,11 @@
 @property (nonatomic, copy) NSString *uri;
 @property (nonatomic, copy) NSString *commonName;
 @property (nonatomic, copy) NSString *email;
+@property (nonatomic, copy) NSString *status;
 
 @property (nonatomic, assign) PURole role;
 
-- (id)initWithRole:(PURole)role commonName:(NSString *)commonName email:(NSString *)email andUri:(NSString *)uri;
+- (id)initWithRole:(PURole)role commonName:(NSString *)commonName email:(NSString *)email status:(NSString*)status andUri:(NSString *)uri;
 + (instancetype)attendeeForString:(NSString *)attendeeString;
 
 @end
