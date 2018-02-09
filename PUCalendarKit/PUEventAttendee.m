@@ -19,14 +19,14 @@
         [copy setUri:[self.uri copyWithZone:zone]];
         [copy setCommonName:[self.commonName copyWithZone:zone]];
         [copy setEmail:[self.email copyWithZone:zone]];
-        
+        [copy setStatus:[self.status copyWithZone:zone]];
         [copy setRole:self.role];
     }
     
     return copy;
 }
 
-- (id)initWithRole:(PURole)role commonName:(NSString *)commonName email:(NSString *)email andUri:(NSString *)uri {
+- (id)initWithRole:(PURole)role commonName:(NSString *)commonName email:(NSString *)email status:(NSString*)status andUri:(NSString *)uri {
     
     self = [super init];
     
@@ -36,6 +36,7 @@
         self.commonName = commonName;
         self.uri = uri;
         self.email = email;
+        self.status = status;
     }
     
     return self;
@@ -76,6 +77,12 @@
             NSString *role = [placeholder stringByReplacingOccurrencesOfString:@"ROLE=" withString:@""];
             //Assign the Role
             attendee.role = [role roleForICSRoleString];
+
+            [attributesScanner scanUpToString:@"PARTSTAT=" intoString:nil];
+            [attributesScanner scanUpToString:@";" intoString:&placeholder];
+
+            NSString *status = [placeholder stringByReplacingOccurrencesOfString:@"PARTSTAT=" withString:@""];
+            attendee.status = status;
             
             attributesScanner = [NSScanner scannerWithString:attributes];
             [attributesScanner scanUpToString:@"CN=" intoString:nil];
