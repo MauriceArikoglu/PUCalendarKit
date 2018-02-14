@@ -491,8 +491,9 @@
     // Extract the event location
     [locationScanner scanUpToString:@"LOCATION:" intoString:nil];
     [locationScanner scanUpToString:@"\n" intoString:&locationString];
-    
-    return [[locationString stringByReplacingOccurrencesOfString:@"LOCATION:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
+
+    locationString = [[locationString stringByReplacingOccurrencesOfString:@"LOCATION:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
+    return [[locationString stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"] stringByReplacingOccurrencesOfString:@"\\" withString:@""];
 }
 
 #pragma mark - Last Modified Date
