@@ -69,32 +69,28 @@
             
             //Scan attributes
             NSScanner *attributesScanner = [NSScanner scannerWithString:attributes];
-            NSString *placeholder = @"";
-            
+
+            NSString *role = @"";
             [attributesScanner scanUpToString:@"ROLE=" intoString:nil];
-            [attributesScanner scanUpToString:@";" intoString:&placeholder];
-            
-            NSString *role = [placeholder stringByReplacingOccurrencesOfString:@"ROLE=" withString:@""];
-            //Assign the Role
-            attendee.role = [role roleForICSRoleString];
+            [attributesScanner scanUpToString:@";" intoString:&role];
+            attendee.role = [[role stringByReplacingOccurrencesOfString:@"ROLE=" withString:@""] roleForICSRoleString];
 
+            NSString *status = @"";
             [attributesScanner scanUpToString:@"PARTSTAT=" intoString:nil];
-            [attributesScanner scanUpToString:@";" intoString:&placeholder];
+            [attributesScanner scanUpToString:@";" intoString:&status];
+            attendee.status = [status stringByReplacingOccurrencesOfString:@"PARTSTAT=" withString:@""];
 
-            NSString *status = [placeholder stringByReplacingOccurrencesOfString:@"PARTSTAT=" withString:@""];
-            attendee.status = status;
-            
+            NSString *name = @"";
             attributesScanner = [NSScanner scannerWithString:attributes];
             [attributesScanner scanUpToString:@"CN=" intoString:nil];
-            [attributesScanner scanUpToString:@";" intoString:&placeholder];
-            
-            NSString *name = [placeholder stringByReplacingOccurrencesOfString:@"CN=" withString:@""];
-            attendee.commonName = name;
+            [attributesScanner scanUpToString:@";" intoString:&name];
+            attendee.commonName = [name stringByReplacingOccurrencesOfString:@"CN=" withString:@""];;
 
+            NSString *email = @"";
             NSScanner *emailScanner = [NSScanner scannerWithString:attendeeString];
             [emailScanner scanUpToString:@"mailto:" intoString:nil];
-            [emailScanner scanUpToString:@"" intoString:&placeholder];
-            attendee.email = [placeholder stringByReplacingOccurrencesOfString:@"mailto:" withString:@"" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [placeholder length])];
+            [emailScanner scanUpToString:@"" intoString:&email];
+            attendee.email = [email stringByReplacingOccurrencesOfString:@"mailto:" withString:@"" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [email length])];
         }
         
         return attendee;
