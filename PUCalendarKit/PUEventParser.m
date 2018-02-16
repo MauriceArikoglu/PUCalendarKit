@@ -491,8 +491,9 @@
     // Extract the event location
     [locationScanner scanUpToString:@"LOCATION:" intoString:nil];
     [locationScanner scanUpToString:@"\n" intoString:&locationString];
-    
-    return [[locationString stringByReplacingOccurrencesOfString:@"LOCATION:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
+
+    locationString = [[locationString stringByReplacingOccurrencesOfString:@"LOCATION:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
+    return [[locationString stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"] stringByReplacingOccurrencesOfString:@"\\" withString:@""];
 }
 
 #pragma mark - Last Modified Date
@@ -517,12 +518,34 @@
     NSString *descriptionString;
     
     NSScanner *descriptionScanner = [NSScanner scannerWithString:extractString];
-    
+    descriptionScanner.charactersToBeSkipped = [PUEventParser characterSetWithNewLineSkip];
+
     // Extract event description
     [descriptionScanner scanUpToString:@"DESCRIPTION:" intoString:nil];
     [descriptionScanner scanUpToString:@"\n" intoString:&descriptionString];
-    
+
+    // description could have newline characters in them (ideally newlines within the description should be represented by \\n as per ICS protocol)
+    // we know these newlines are characters within the description and not delimiters, since they start with a space or tab
+    BOOL isMultiLineDescription = true;
+
+    while (isMultiLineDescription) {
+        NSString *nextLine;
+        [descriptionScanner scanUpToString:@"\n" intoString:&nextLine];
+        if ([nextLine hasPrefix:@" "] || [nextLine hasPrefix:@"\\t"]) {
+            descriptionString = [descriptionString stringByAppendingString:[nextLine stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]];
+        } else {
+            isMultiLineDescription = false;
+        }
+    }
+
     return [[descriptionString stringByReplacingOccurrencesOfString:@"DESCRIPTION:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
+}
+
++ (NSMutableCharacterSet *)characterSetWithNewLineSkip {
+    NSMutableCharacterSet *skipCharacterSet = [[NSMutableCharacterSet alloc] init];
+    [skipCharacterSet addCharactersInString:@"\n"];
+    [skipCharacterSet addCharactersInString:@"\r\n"];
+    return skipCharacterSet;
 }
 
 #pragma mark - Created Date
@@ -562,6 +585,7 @@
     NSMutableArray <PUEventAttendee *> *attendees = [NSMutableArray new];
     
     NSScanner *attendeesScanner = [NSScanner scannerWithString:extractString];
+    attendeesScanner.charactersToBeSkipped = [PUEventParser characterSetWithNewLineSkip];
     
     // Extract the attendees
     BOOL scannerStatus;
@@ -579,6 +603,20 @@
             scannerStatus = [attendeesScanner scanUpToString:@"\n" intoString:&attendeeString];
             
             if (scannerStatus) {
+
+                BOOL isMultiLineDescription = true;
+
+                while (isMultiLineDescription) {
+                    NSString *nextLine;
+                    NSUInteger originalScanLocation = attendeesScanner.scanLocation;
+                    [attendeesScanner scanUpToString:@"\n" intoString:&nextLine];
+                    if ([nextLine hasPrefix:@" "] || [nextLine hasPrefix:@"\\t"]) {
+                        attendeeString = [attendeeString stringByAppendingString:[nextLine stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]];
+                    } else {
+                        [attendeesScanner setScanLocation:originalScanLocation];
+                        isMultiLineDescription = false;
+                    }
+                }
                 
                 attendeeString = [[attendeeString stringByReplacingOccurrencesOfString:@"ATTENDEE;" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
                 
@@ -607,11 +645,18 @@
 
     NSScanner *organizerScanner = [NSScanner scannerWithString:extractString];
 
+    // ICS contains `ORGANIZER:` instead of `ORGANIZER;` when user RSVPs from outlook/some microsoft app
+    // so we check for both
     [organizerScanner scanUpToString:@"ORGANIZER;" intoString:nil];
+    if (organizerScanner.isAtEnd) {
+        [organizerScanner setScanLocation:0];
+        [organizerScanner scanUpToString:@"ORGANIZER:" intoString:nil];
+    }
+    
     [organizerScanner scanUpToString:@"mailto:" intoString:nil];
     [organizerScanner scanUpToString:@"\n" intoString:&organizerEmailString];
 
-    return [[organizerEmailString stringByReplacingOccurrencesOfString:@"mailto:" withString:@""] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
+    return [[organizerEmailString stringByReplacingOccurrencesOfString:@"mailto:" withString:@"" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [organizerEmailString length])] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet];
 }
 
 #pragma mark - Unique Id

@@ -19,14 +19,14 @@
         [copy setUri:[self.uri copyWithZone:zone]];
         [copy setCommonName:[self.commonName copyWithZone:zone]];
         [copy setEmail:[self.email copyWithZone:zone]];
-        
+        [copy setStatus:[self.status copyWithZone:zone]];
         [copy setRole:self.role];
     }
     
     return copy;
 }
 
-- (id)initWithRole:(PURole)role commonName:(NSString *)commonName email:(NSString *)email andUri:(NSString *)uri {
+- (id)initWithRole:(PURole)role commonName:(NSString *)commonName email:(NSString *)email status:(NSString*)status andUri:(NSString *)uri {
     
     self = [super init];
     
@@ -36,6 +36,7 @@
         self.commonName = commonName;
         self.uri = uri;
         self.email = email;
+        self.status = status;
     }
     
     return self;
@@ -68,26 +69,28 @@
             
             //Scan attributes
             NSScanner *attributesScanner = [NSScanner scannerWithString:attributes];
-            NSString *placeholder = @"";
-            
+
+            NSString *role = @"";
             [attributesScanner scanUpToString:@"ROLE=" intoString:nil];
-            [attributesScanner scanUpToString:@";" intoString:&placeholder];
-            
-            NSString *role = [placeholder stringByReplacingOccurrencesOfString:@"ROLE=" withString:@""];
-            //Assign the Role
-            attendee.role = [role roleForICSRoleString];
-            
+            [attributesScanner scanUpToString:@";" intoString:&role];
+            attendee.role = [[role stringByReplacingOccurrencesOfString:@"ROLE=" withString:@""] roleForICSRoleString];
+
+            NSString *status = @"";
+            [attributesScanner scanUpToString:@"PARTSTAT=" intoString:nil];
+            [attributesScanner scanUpToString:@";" intoString:&status];
+            attendee.status = [status stringByReplacingOccurrencesOfString:@"PARTSTAT=" withString:@""];
+
+            NSString *name = @"";
             attributesScanner = [NSScanner scannerWithString:attributes];
             [attributesScanner scanUpToString:@"CN=" intoString:nil];
-            [attributesScanner scanUpToString:@";" intoString:&placeholder];
-            
-            NSString *name = [placeholder stringByReplacingOccurrencesOfString:@"CN=" withString:@""];
-            attendee.commonName = name;
+            [attributesScanner scanUpToString:@";" intoString:&name];
+            attendee.commonName = [name stringByReplacingOccurrencesOfString:@"CN=" withString:@""];;
 
+            NSString *email = @"";
             NSScanner *emailScanner = [NSScanner scannerWithString:attendeeString];
             [emailScanner scanUpToString:@"mailto:" intoString:nil];
-            [emailScanner scanUpToString:@"" intoString:&placeholder];
-            attendee.email = [placeholder stringByReplacingOccurrencesOfString:@"mailto:" withString:@""];
+            [emailScanner scanUpToString:@"" intoString:&email];
+            attendee.email = [email stringByReplacingOccurrencesOfString:@"mailto:" withString:@"" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [email length])];
         }
         
         return attendee;
