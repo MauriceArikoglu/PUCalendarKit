@@ -151,7 +151,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
         self.eventUniqueId = uniqueId;
         self.eventRecurrenceId  = recurrenceId;
         self.eventSummary = [summary stringByReplacingOccurrencesOfString:@"\\" withString:@""];
-        self.eventDescription = [[description stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"] stringByReplacingOccurrencesOfString:@"\\" withString:@""];
+        self.eventDescription = [description stringByReplacingOccurrencesOfString:@"\\" withString:@""];
         self.eventLocation = [location stringByReplacingOccurrencesOfString:@"\\" withString:@""];
         self.eventStatus = status;
         self.eventAttendees = attendees.copy;
@@ -182,9 +182,10 @@ static NSString *const kDayOfWeekSaturday = @"SA";
 - (BOOL)checkDate:(NSDate *)date {
 
     // If the event starts in the future
-    if ([self.eventStartDate compare:[NSDate date]] == NSOrderedDescending) {
+    if ([self.eventStartDate compare:date] == NSOrderedDescending) {
         return NO;
     }
+
 
     // If the event does not repeat, the 'date' must be the event's start date for event to occur on this date
     if (!self.recurrenceRules.repeatRuleFrequency) {
@@ -278,7 +279,8 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             if ([maximumDate compare:date] == NSOrderedDescending || [maximumDate compare:date] == NSOrderedSame) {
 
                 // Get the number of weeks between the final date and current date
-                NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:maximumDate toDate:date options:0].day;
+                  NSInteger difference = [self.calendar components:NSCalendarUnitWeekOfYear fromDate:maximumDate toDate:date options:0].weekOfYear + 1;
+              
 
                 // If the difference between the two dates fits the recurrence pattern
                 if (difference % self.recurrenceRules.repeatRuleInterval) {
@@ -299,7 +301,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
                 [self.recurrenceRules.repeatRuleUntilDate compare:date] == NSOrderedDescending) {
 
                 // Find the difference (as before)
-                NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:self.recurrenceRules.repeatRuleUntilDate toDate:date options:0].day;
+                NSInteger difference = [self.calendar components:NSCalendarUnitWeekOfYear fromDate:self.recurrenceRules.repeatRuleUntilDate toDate:date options:0].weekOfYear + 1;
 
                 // If the difference between the two dates fits the recurrence pattern
                 if (difference % self.recurrenceRules.repeatRuleInterval) {
@@ -315,10 +317,9 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             }
         } else {
             // If there's no recurrence limit, we just have to check if the
-            NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:self.eventCreatedDate toDate:date options:0].day;
+            NSInteger difference = [self.calendar components:NSCalendarUnitWeekOfYear fromDate:self.eventStartDate toDate:date options:0].weekOfYear + 1;
             
             if (difference % self.recurrenceRules.repeatRuleInterval) {
-                
                 return NO;
             } else {
                 
@@ -373,7 +374,7 @@ static NSString *const kDayOfWeekSaturday = @"SA";
             }
         } else {
             
-            NSInteger difference = [self.calendar components:NSCalendarUnitDay fromDate:self.eventCreatedDate toDate:date options:0].month;
+            NSInteger difference = [self.calendar components:NSCalendarUnitMonth fromDate:self.eventCreatedDate toDate:date options:0].month;
             
             if (difference % self.recurrenceRules.repeatRuleInterval) {
                 
